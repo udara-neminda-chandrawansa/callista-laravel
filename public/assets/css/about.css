@@ -61,8 +61,6 @@
   padding: 100px 72px 50px 72px; /* top padding for navbar height */
   text-align: left;
   color: var(--white-color);
-  background-image: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)),
-    url("../assets/about.png");
   background-size: cover;
   background-position: center center;
   overflow: hidden;
@@ -93,7 +91,7 @@
   position: relative;
   height: 100vh;
   width: 100%;
-  background: url("../assets/about.png") no-repeat center center/cover;
+  background: url("../about.png") no-repeat center center/cover;
   overflow: hidden;
 }
 

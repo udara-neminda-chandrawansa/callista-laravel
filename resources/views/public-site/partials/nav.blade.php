@@ -8,12 +8,12 @@
 
         <div class="nav-menu" id="navMenu">
             <ul class="nav-list">
-                <li><a href="/" class="nav-link active">Home</a></li>
-                <li><a href="/marketplace" class="nav-link">Marketplace</a></li>
-                <li><a href="/customize" class="nav-link">Customize</a></li>
-                <li><a href="/interior" class="nav-link">Interior Design</a></li>
-                <li><a href="/about" class="nav-link">About</a></li>
-                <li><a href="/contact" class="nav-link">Contact</a></li>
+                <li><a href="/" class="nav-link {{ in_array(Route::currentRouteName(), ['home']) ? 'active' : '' }}">Home</a></li>
+                <li><a href="/marketplace" class="nav-link {{ in_array(Route::currentRouteName(), ['marketplace']) ? 'active' : '' }}">Marketplace</a></li>
+                <li><a href="/customize" class="nav-link {{ in_array(Route::currentRouteName(), ['customize']) ? 'active' : '' }}">Customize</a></li>
+                <li><a href="/interior-design" class="nav-link {{ in_array(Route::currentRouteName(), ['interior-design']) ? 'active' : '' }}">Interior Design</a></li>
+                <li><a href="/about" class="nav-link {{ in_array(Route::currentRouteName(), ['about']) ? 'active' : '' }}">About</a></li>
+                <li><a href="/contact" class="nav-link {{ in_array(Route::currentRouteName(), ['contact']) ? 'active' : '' }}">Contact</a></li>
             </ul>
         </div>
 

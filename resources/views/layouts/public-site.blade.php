@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Callista LK - Premium Furniture & Interior Design</title>
 
+    <link rel="shortcut icon" href="{{ asset('assets/cali.jpg') }}" type="image/x-icon">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -18,6 +20,8 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ asset('assets/css/styles.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/responsive.css') }}">
+
+    @stack('styles')
 </head>
 
 <body>
@@ -36,6 +40,8 @@
     @yield('content')
 
     @include('public-site.partials.footer')
+
+    @stack('scripts')
 
 </body>
 </html>
