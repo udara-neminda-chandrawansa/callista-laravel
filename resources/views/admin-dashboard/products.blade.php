@@ -19,7 +19,7 @@
                         <i class="fas fa-box"></i>
                     </div>
                 </div>
-                <div class="stat-value">{{ count($products) }}</div>
+                <div class="stat-value">{{ \App\Models\Product::count() }}</div>
                 <div class="stat-change positive">
                     <i class="fas fa-info-circle"></i>
                     <span>All products in catalog</span>
@@ -33,11 +33,11 @@
                         <i class="fas fa-check-circle"></i>
                     </div>
                 </div>
-                <div class="stat-value">{{ $products->where('stock_status', 'in-stock')->count() }}</div>
+                <div class="stat-value">{{ \App\Models\Product::where('stock_status', 'in_stock')->count() }}</div>
                 <div class="stat-change positive">
                     <i class="fas fa-arrow-up"></i>
-                    <span>{{ $products->count() > 0 ? round(($products->where('stock_status', 'in-stock')->count() /
-                        $products->count()) * 100, 1) : 0 }}% of total inventory</span>
+                    <span>{{ \App\Models\Product::count() > 0 ? round((\App\Models\Product::where('stock_status', 'in_stock')->count() /
+                        \App\Models\Product::count()) * 100, 1) : 0 }}% of total inventory</span>
                 </div>
             </div>
 
@@ -48,7 +48,7 @@
                         <i class="fas fa-exclamation-triangle"></i>
                     </div>
                 </div>
-                <div class="stat-value">{{ $products->where('stock_status', 'low-stock')->count() }}</div>
+                <div class="stat-value">{{ \App\Models\Product::where('stock_status', 'low_stock')->count() }}</div>
                 <div class="stat-change neutral">
                     <i class="fas fa-minus"></i>
                     <span>Needs restocking</span>
@@ -62,7 +62,7 @@
                         <i class="fas fa-times-circle"></i>
                     </div>
                 </div>
-                <div class="stat-value">{{ $products->where('stock_status', 'out-of-stock')->count() }}</div>
+                <div class="stat-value">{{ \App\Models\Product::where('stock_status', 'out_of_stock')->count() }}</div>
                 <div class="stat-change negative">
                     <i class="fas fa-arrow-down"></i>
                     <span>Unavailable products</span>
@@ -78,66 +78,94 @@
             Inventory Alerts
         </div>
         <ul class="alert-list">
+            @php
+                $lowStockProducts = $products->where('stock_status', 'low_stock');
+                $outOfStockProducts = $products->where('stock_status', 'out_of_stock');
+            @endphp
+            
+            @forelse($outOfStockProducts->take(3) as $product)
+            <li class="alert-item">
+                <span class="stock-indicator stock-out"></span>
+                {{ $product->name }} - Out of Stock
+            </li>
+            @empty
+            @endforelse
+            
+            @forelse($lowStockProducts->take(3) as $product)
             <li class="alert-item">
                 <span class="stock-indicator stock-low"></span>
-                Modern Dining Table - Only 3 units left
+                {{ $product->name }} - Low Stock Alert
             </li>
+            @empty
+            @endforelse
+            
+            @if($outOfStockProducts->count() == 0 && $lowStockProducts->count() == 0)
             <li class="alert-item">
-                <span class="stock-indicator stock-low"></span>
-                Ergonomic Office Chair - Only 2 units left
+                <span class="stock-indicator stock-good"></span>
+                All products are in stock - No alerts
             </li>
-            <li class="alert-item">
-                <span class="stock-indicator stock-medium"></span>
-                Luxury Sofa Set - 8 units remaining
-            </li>
+            @endif
         </ul>
     </div>
 
     <!-- Product Filters -->
+    <!-- Product Filters -->
     <div class="product-filters">
-        <div class="filter-row">
-            <div class="form-group">
-                <label class="form-label">Product Name</label>
-                <input type="text" class="form-input" placeholder="Search by name...">
+        <form id="filterForm" action="{{ route('admin.products') }}" method="GET">
+            <div class="filter-row">
+                <div class="form-group">
+                    <label class="form-label">Product Name</label>
+                    <input type="text" name="search" class="form-input" placeholder="Search by name..." value="{{ request('search') }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <select name="category" class="form-select">
+                        <option value="">All Categories</option>
+                        @php
+                            $categories = $products->pluck('type')->unique()->filter();
+                        @endphp
+                        @foreach($categories as $category)
+                        <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>
+                            {{ ucfirst($category) }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Price Range</label>
+                    <select name="price_range" class="form-select">
+                        <option value="">All Prices</option>
+                        <option value="0-5000" {{ request('price_range') == '0-5000' ? 'selected' : '' }}>Under LKR 5,000</option>
+                        <option value="5000-15000" {{ request('price_range') == '5000-15000' ? 'selected' : '' }}>LKR 5,000 - 15,000</option>
+                        <option value="15000-30000" {{ request('price_range') == '15000-30000' ? 'selected' : '' }}>LKR 15,000 - 30,000</option>
+                        <option value="30000-50000" {{ request('price_range') == '30000-50000' ? 'selected' : '' }}>LKR 30,000 - 50,000</option>
+                        <option value="50000+" {{ request('price_range') == '50000+' ? 'selected' : '' }}>Above LKR 50,000</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Stock Status</label>
+                    <select name="stock_status" class="form-select">
+                        <option value="">All Status</option>
+                        <option value="in_stock" {{ request('stock_status') == 'in_stock' ? 'selected' : '' }}>In Stock</option>
+                        <option value="low_stock" {{ request('stock_status') == 'low_stock' ? 'selected' : '' }}>Low Stock</option>
+                        <option value="out_of_stock" {{ request('stock_status') == 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-filter"></i>
+                        Filter
+                    </button>
+                    @if(request()->hasAny(['search', 'category', 'price_range', 'stock_status']))
+                    <a href="{{ route('admin.products') }}" class="btn-clear">
+                        <i class="fas fa-times"></i>
+                        Clear
+                    </a>
+                    @endif
+                </div>
             </div>
-            <div class="form-group">
-                <label class="form-label">Category</label>
-                <select class="form-select">
-                    <option value="">All Categories</option>
-                    <option value="living-room">Living Room</option>
-                    <option value="bedroom">Bedroom</option>
-                    <option value="tables">Tables</option>
-                    <option value="chairs">Chairs</option>
-                    <option value="custom">Custom</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Price Range</label>
-                <select class="form-select">
-                    <option value="">All Prices</option>
-                    <option value="0-50000">LKR 0 - 50,000</option>
-                    <option value="50000-100000">LKR 50,000 - 100,000</option>
-                    <option value="100000-200000">LKR 100,000 - 200,000</option>
-                    <option value="200000+">LKR 200,000+</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label class="form-label">Stock Status</label>
-                <select class="form-select">
-                    <option value="">All Stock</option>
-                    <option value="in-stock">In Stock</option>
-                    <option value="low-stock">Low Stock</option>
-                    <option value="out-of-stock">Out of Stock</option>
-                </select>
-            </div>
-            <button class="btn-filter">
-                <i class="fas fa-filter"></i>
-                Filter
-            </button>
-        </div>
-    </div>
-
-    <!-- Products Grid - Highlighted Section -->
+        </form>
+    </div>    <!-- Products Grid - Highlighted Section -->
     <div class="highlighted-section">
         <div class="highlight-badge">Product Catalog</div>
         <div class="product-header" style="justify-content: space-between;">
@@ -299,6 +327,7 @@
                     <select id="stock_status" name="stock_status" class="form-input" required>
                         <option value="">Select Status</option>
                         <option value="in_stock">In Stock</option>
+                        <option value="low_stock">Low Stock</option>
                         <option value="out_of_stock">Out of Stock</option>
                     </select>
                 </div>
@@ -404,6 +433,7 @@
                     <select id="edit_stock_status" name="stock_status" class="form-input" required>
                         <option value="">Select Status</option>
                         <option value="in_stock">In Stock</option>
+                        <option value="low_stock">Low Stock</option>
                         <option value="out_of_stock">Out of Stock</option>
                     </select>
                 </div>
@@ -696,6 +726,138 @@
         margin-bottom: 0.5rem;
         opacity: 0.5;
     }
+
+    /* Filter and Alert Styles */
+    .product-filters {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .filter-row {
+        display: grid;
+        grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1fr;
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .btn-filter, .btn-clear {
+        padding: 0.75rem 1.5rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s;
+        text-decoration: none;
+        text-align: center;
+        justify-content: center;
+    }
+
+    .btn-filter {
+        background: var(--gradient-primary);
+        color: white;
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .btn-clear {
+        background: #dc3545;
+        color: white;
+        margin-left: 0.5rem;
+    }
+
+    .btn-clear:hover {
+        background: #c82333;
+        transform: translateY(-2px);
+    }
+
+    .form-select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
+
+    .inventory-alerts {
+        background: white;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-sm);
+    }
+
+    .alert-title {
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: var(--dark-color);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .alert-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .alert-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+        border-bottom: 1px solid var(--light-gray);
+    }
+
+    .alert-item:last-child {
+        border-bottom: none;
+    }
+
+    .stock-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .stock-indicator.stock-low {
+        background: #ffc107;
+    }
+
+    .stock-indicator.stock-out {
+        background: #dc3545;
+    }
+
+    .stock-indicator.stock-good {
+        background: #28a745;
+    }
+
+    @media (max-width: 768px) {
+        .filter-row {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .btn-clear {
+            margin-left: 0;
+            margin-top: 0.5rem;
+        }
+    }
 </style>
 @endpush
 
@@ -949,6 +1111,38 @@
                 setTimeout(() => notification.remove(), 300);
             }, 4000);
         }
+
+        // Filter functionality
+        $('.form-select, .form-input[name="search"]').on('change input', function() {
+            // Optional: Auto-submit on change (uncomment if desired)
+            // $('#filterForm').submit();
+        });
+
+        // Clear search on escape key
+        $('.form-input[name="search"]').on('keydown', function(e) {
+            if (e.key === 'Escape') {
+                $(this).val('');
+            }
+        });
+
+        // Show filter status
+        function updateFilterStatus() {
+            const activeFilters = [];
+            
+            if ($('[name="search"]').val()) activeFilters.push('Search');
+            if ($('[name="category"]').val()) activeFilters.push('Category');
+            if ($('[name="price_range"]').val()) activeFilters.push('Price');
+            if ($('[name="stock_status"]').val()) activeFilters.push('Stock Status');
+            
+            if (activeFilters.length > 0) {
+                $('.btn-filter').html('<i class="fas fa-filter"></i> Filter (' + activeFilters.length + ')');
+            } else {
+                $('.btn-filter').html('<i class="fas fa-filter"></i> Filter');
+            }
+        }
+
+        updateFilterStatus();
+        $('.form-select, .form-input[name="search"]').on('change input', updateFilterStatus);
     });
 </script>
 @endpush

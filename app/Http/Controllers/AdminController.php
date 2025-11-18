@@ -51,7 +51,7 @@ class AdminController extends Controller
         return view('admin-dashboard.users', compact('users', 'products', 'orders'));
     }
 
-    public function products()
+    public function products(Request $request)
     {
         // Ensure only admins can access
         if (auth()->user()->role !== 'admin') {
@@ -59,8 +59,49 @@ class AdminController extends Controller
         }
 
         $users = User::all();
-        $products = Product::orderBy('created_at', 'desc')->paginate(12);
         $orders = UserOrder::all();
+        
+        // Build query with filters
+        $query = Product::query();
+        
+        // Search filter
+        if ($request->filled('search')) {
+            $query->where('name', 'like', '%' . $request->search . '%');
+        }
+        
+        // Category filter
+        if ($request->filled('category')) {
+            $query->where('type', $request->category);
+        }
+        
+        // Price range filter
+        if ($request->filled('price_range')) {
+            switch ($request->price_range) {
+                case '0-5000':
+                    $query->where('new_price', '<=', 5000);
+                    break;
+                case '5000-15000':
+                    $query->whereBetween('new_price', [5000, 15000]);
+                    break;
+                case '15000-30000':
+                    $query->whereBetween('new_price', [15000, 30000]);
+                    break;
+                case '30000-50000':
+                    $query->whereBetween('new_price', [30000, 50000]);
+                    break;
+                case '50000+':
+                    $query->where('new_price', '>', 50000);
+                    break;
+            }
+        }
+        
+        // Stock status filter
+        if ($request->filled('stock_status')) {
+            $query->where('stock_status', $request->stock_status);
+        }
+        
+        $products = $query->orderBy('created_at', 'desc')->paginate(12)->withQueryString();
+        
         return view('admin-dashboard.products', compact('products', 'users', 'orders'));
     }
 
