@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="shortcut icon" href="{{ asset('assets/images/logo.png') }}" type="image/x-icon">
     <title>Admin Dashboard - Callista LK</title>
 
@@ -14,10 +15,15 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
         rel="stylesheet">
 
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Custom CSS -->
+    @stack('styles')
+    
     <style>
         :root {
             --primary-color: #8b4513;
@@ -809,6 +815,10 @@
 
         console.log('Admin Dashboard loaded successfully!');
     </script>
+
+    @stack('scripts')
 </body>
+
+<script src="{{ asset('assets/js/main.js') }}"></script>
 
 </html>
