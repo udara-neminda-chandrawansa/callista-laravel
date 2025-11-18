@@ -40,12 +40,16 @@ Route::get('/contact', function () {
     return view('public-site.contact');
 })->name('contact');
 
+Route::get('/cart', function () {
+    return view('public-site.cart');
+})->name('cart');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
     Route::get('/dashboard', function () {
-        return view('dashboard');
+        return view('public-site.dashboard');
     })->name('dashboard');
 });

@@ -2,6 +2,10 @@
 
 @section('content')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/customize.css') }}">
+@endpush
+
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="hero-overlay"></div>

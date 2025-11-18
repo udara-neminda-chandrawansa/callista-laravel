@@ -15,156 +15,130 @@ function setupPasswordToggle() {
     const toggleBtns = document.querySelectorAll('.toggle-password');
     
     toggleBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const input = this.previousElementSibling;
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Find the input field within the same password-input-group
+            const passwordGroup = this.closest('.password-input-group');
+            const input = passwordGroup.querySelector('input[type="password"], input[type="text"]');
             const icon = this.querySelector('i');
             
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+            if (input) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                    this.setAttribute('aria-label', 'Hide password');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                    this.setAttribute('aria-label', 'Show password');
+                }
             }
         });
     });
 }
 
-// Login Form
+// Login Form - Basic validation only (Laravel handles submission)
 function setupLoginForm() {
-    const loginForm = document.getElementById('loginForm');
+    const loginForm = document.querySelector('form[action*="login"]');
     
     if (loginForm) {
         loginForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const remember = document.getElementById('remember').checked;
             
-            // Validate
+            // Basic client-side validation
             if (!validateEmail(email)) {
+                e.preventDefault();
                 showNotification('Please enter a valid email address', 'error');
                 return;
             }
             
-            if (password.length < 6) {
-                showNotification('Password must be at least 6 characters', 'error');
+            if (password.length < 1) {
+                e.preventDefault();
+                showNotification('Please enter your password', 'error');
                 return;
             }
             
-            // Show loading
+            // Show loading state
             const submitBtn = loginForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
             
-            // Simulate API call
+            // Re-enable button after a delay in case of validation errors
             setTimeout(() => {
-                // Reset button
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
-                
-                // Success
-                showNotification('Login successful! Redirecting...', 'success');
-                
-                // Store user data (demo)
-                localStorage.setItem('userEmail', email);
-                if (remember) {
-                    localStorage.setItem('rememberMe', 'true');
-                }
-                
-                // Redirect
-                setTimeout(() => {
-                    const urlParams = new URLSearchParams(window.location.search);
-                    const redirect = urlParams.get('redirect');
-                    window.location.href = redirect ? `${redirect}` : '/dashboard';
-                }, 1500);
-            }, 2000);
+            }, 5000);
         });
     }
 }
 
-// Register Form
+// Register Form - Basic validation only (Laravel handles submission)
 function setupRegisterForm() {
-    const registerForm = document.getElementById('registerForm');
+    const registerForm = document.querySelector('form[action*="register"]');
     
     if (registerForm) {
         registerForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('registerEmail').value;
-            const phone = document.getElementById('phone').value;
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('confirmPassword').value;
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('password_confirmation').value;
             const terms = document.getElementById('terms').checked;
             
-            // Validation
-            if (!firstName || !lastName) {
+            // Basic client-side validation
+            if (!name.trim()) {
+                e.preventDefault();
                 showNotification('Please enter your full name', 'error');
                 return;
             }
             
             if (!validateEmail(email)) {
+                e.preventDefault();
                 showNotification('Please enter a valid email address', 'error');
                 return;
             }
             
-            if (!validatePhone(phone)) {
-                showNotification('Please enter a valid phone number', 'error');
-                return;
-            }
-            
             if (password.length < 8) {
+                e.preventDefault();
                 showNotification('Password must be at least 8 characters', 'error');
                 return;
             }
             
             if (password !== confirmPassword) {
+                e.preventDefault();
                 showNotification('Passwords do not match', 'error');
                 return;
             }
             
             if (!terms) {
+                e.preventDefault();
                 showNotification('Please agree to the Terms of Service', 'error');
                 return;
             }
             
-            // Show loading
+            // Show loading state
             const submitBtn = registerForm.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
             
-            // Simulate API call
+            // Re-enable button after a delay in case of validation errors
             setTimeout(() => {
-                // Reset button
                 submitBtn.disabled = false;
                 submitBtn.innerHTML = originalText;
-                
-                // Success
-                showNotification('Account created successfully! Redirecting...', 'success');
-                
-                // Store user data (demo)
-                localStorage.setItem('userEmail', email);
-                localStorage.setItem('userName', `${firstName} ${lastName}`);
-                
-                // Redirect
-                setTimeout(() => {
-                    window.location.href = '/dashboard';
-                }, 1500);
-            }, 2000);
+            }, 5000);
         });
     }
 }
 
 // Password Strength Indicator
 function setupPasswordStrength() {
-    const passwordInput = document.getElementById('registerPassword');
+    const passwordInput = document.getElementById('password');
     
     if (passwordInput) {
         passwordInput.addEventListener('input', function() {

@@ -11,7 +11,7 @@
       rgba(59, 130, 246, 0.6) 75%,
       rgba(147, 51, 234, 0.5) 100%
     ),
-    url("../assets/custom-furniture.jpg") center/cover no-repeat;
+    url("../custom-furniture.jpg") center/cover no-repeat;
   /* Vibrant teal to purple gradient overlay */
   background-blend-mode: overlay;
   background-color: #0d9488; /* Modern teal fallback */

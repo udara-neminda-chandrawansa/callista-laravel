@@ -303,10 +303,23 @@
   cursor: pointer;
   padding: 8px;
   transition: var(--transition-fast);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
 }
 
 .toggle-password:hover {
   color: var(--primary-color);
+  background: rgba(139, 69, 19, 0.05);
+}
+
+.toggle-password:focus {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
 }
 
 /* ===== PASSWORD STRENGTH ===== */
@@ -476,7 +489,7 @@
   }
 
   .back-home {
-    position: static;
+    position: fixed;
     margin-bottom: 20px;
     display: inline-flex;
   }
@@ -506,4 +519,11 @@
   .auth-header h2 {
     font-size: 1.75rem;
   }
+}
+
+button[type="submit"]{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }

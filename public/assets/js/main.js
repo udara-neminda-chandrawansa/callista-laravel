@@ -889,14 +889,14 @@ document.addEventListener('DOMContentLoaded', function() {
     updateUserInterface();
     
     // Demo: Double-click on user button to simulate login (for testing)
-    if (userAccountBtn) {
-        let clickCount = 0;
-        userAccountBtn.addEventListener('dblclick', function() {
-            if (!isLoggedIn) {
-                simulateLogin('Amara Mendis', 'amara.mendis@email.com');
-            }
-        });
-    }
+    // if (userAccountBtn) {
+    //     let clickCount = 0;
+    //     userAccountBtn.addEventListener('dblclick', function() {
+    //         if (!isLoggedIn) {
+    //             simulateLogin('Amara Mendis', 'amara.mendis@email.com');
+    //         }
+    //     });
+    // }
     
     // Notification system
     function showNotification(message, type = 'info') {

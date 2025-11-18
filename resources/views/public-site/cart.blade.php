@@ -2,11 +2,15 @@
 
 @section('content')
 
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/css/cart.css') }}">
+@endpush
+
 <!-- Cart Page Header -->
 <section class="cart-header">
     <div class="container">
         <div class="breadcrumb">
-            <a href="../index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="/"><i class="fas fa-home"></i> Home</a>
             <span class="separator">/</span>
             <span class="current">Shopping Cart</span>
         </div>
@@ -31,8 +35,7 @@
                 <!-- Cart Item 1 -->
                 <div class="cart-item">
                     <div class="item-image">
-                        <img src="../assets/images/products/chair-1.jpg" alt="Modern Chair"
-                            onerror="this.src='../assets/images/placeholder.jpg'">
+                        <img src="../assets/images/products/chair-1.jpg" alt="Modern Chair">
                         <span class="item-badge">New</span>
                     </div>
                     <div class="item-details">
@@ -67,8 +70,7 @@
                 <!-- Cart Item 2 -->
                 <div class="cart-item">
                     <div class="item-image">
-                        <img src="../assets/images/products/table-1.jpg" alt="Coffee Table"
-                            onerror="this.src='../assets/images/placeholder.jpg'">
+                        <img src="../assets/images/products/table-1.jpg" alt="Coffee Table">
                     </div>
                     <div class="item-details">
                         <h3 class="item-name">Minimalist Coffee Table</h3>
@@ -101,8 +103,7 @@
                 <!-- Cart Item 3 -->
                 <div class="cart-item">
                     <div class="item-image">
-                        <img src="../assets/images/products/lamp-1.jpg" alt="Table Lamp"
-                            onerror="this.src='../assets/images/placeholder.jpg'">
+                        <img src="../assets/images/products/lamp-1.jpg" alt="Table Lamp">
                         <span class="item-badge sale">Sale</span>
                     </div>
                     <div class="item-details">
@@ -136,10 +137,10 @@
 
                 <!-- Continue Shopping -->
                 <div class="continue-shopping">
-                    <a href="marketplace.html" class="btn btn-outline">
+                    <a href="/marketplace" class="btn btn-outline">
                         <i class="fas fa-arrow-left"></i> Continue Shopping
                     </a>
-                    <a href="marketplace.html#featured-products" class="btn btn-secondary">
+                    <a href="/marketplace#featured-products" class="btn btn-secondary">
                         <i class="fas fa-store"></i> Browse All Products
                     </a>
                 </div>
@@ -228,7 +229,7 @@
     <div class="container">
         <div class="section-header">
             <h2 class="section-title">You May Also Like</h2>
-            <a href="marketplace.html" class="view-all-link">
+            <a href="/marketplace" class="view-all-link">
                 <span>View All Products</span>
                 <i class="fas fa-arrow-right"></i>
             </a>
@@ -236,8 +237,7 @@
         <div class="products-grid">
             <div class="product-card" data-category="living-room">
                 <div class="product-image">
-                    <img src="../assets/images/products/product-1.jpg" alt="Product"
-                        onerror="this.src='../assets/images/placeholder.jpg'">
+                    <img src="../assets/images/products/product-1.jpg" alt="Product">
                     <button class="quick-add" title="Add to Cart" aria-label="Add Designer Sofa to Cart">
                         <i class="fas fa-shopping-cart"></i>
                     </button>
@@ -253,7 +253,7 @@
                         <i class="fas fa-star-half-alt"></i>
                         <span>(4.5)</span>
                     </div>
-                    <a href="marketplace.html#category-living-room" class="category-link">
+                    <a href="/marketplace#category-living-room" class="category-link">
                         <i class="fas fa-tag"></i>
                         <span>Browse Living Room</span>
                     </a>
@@ -262,8 +262,7 @@
 
             <div class="product-card" data-category="bedroom-sets">
                 <div class="product-image">
-                    <img src="../assets/images/products/product-2.jpg" alt="Product"
-                        onerror="this.src='../assets/images/placeholder.jpg'">
+                    <img src="../assets/images/products/product-2.jpg" alt="Product">
                     <button class="quick-add" title="Add to Cart" aria-label="Add Wooden Cabinet to Cart">
                         <i class="fas fa-shopping-cart"></i>
                     </button>
@@ -280,7 +279,7 @@
                         <i class="far fa-star"></i>
                         <span>(4.0)</span>
                     </div>
-                    <a href="marketplace.html#category-bedroom-sets" class="category-link">
+                    <a href="/marketplace#category-bedroom-sets" class="category-link">
                         <i class="fas fa-tag"></i>
                         <span>Browse Bedroom Sets</span>
                     </a>
@@ -289,8 +288,7 @@
 
             <div class="product-card" data-category="tables">
                 <div class="product-image">
-                    <img src="../assets/images/products/product-3.jpg" alt="Product"
-                        onerror="this.src='../assets/images/placeholder.jpg'">
+                    <img src="../assets/images/products/product-3.jpg" alt="Product">
                     <button class="quick-add" title="Add to Cart" aria-label="Add Floor Lamp to Cart">
                         <i class="fas fa-shopping-cart"></i>
                     </button>
@@ -306,7 +304,7 @@
                         <i class="fas fa-star"></i>
                         <span>(5.0)</span>
                     </div>
-                    <a href="marketplace.html#category-tables" class="category-link">
+                    <a href="/marketplace#category-tables" class="category-link">
                         <i class="fas fa-tag"></i>
                         <span>Browse Tables</span>
                     </a>
@@ -315,8 +313,7 @@
 
             <div class="product-card" data-category="chairs">
                 <div class="product-image">
-                    <img src="../assets/images/products/product-4.jpg" alt="Product"
-                        onerror="this.src='../assets/images/placeholder.jpg'">
+                    <img src="../assets/images/products/product-4.jpg" alt="Product">
                     <button class="quick-add" title="Add to Cart" aria-label="Add Decorative Mirror to Cart">
                         <i class="fas fa-shopping-cart"></i>
                     </button>
@@ -336,7 +333,7 @@
                         <i class="fas fa-star-half-alt"></i>
                         <span>(4.7)</span>
                     </div>
-                    <a href="marketplace.html#category-chairs" class="category-link">
+                    <a href="/marketplace#category-chairs" class="category-link">
                         <i class="fas fa-tag"></i>
                         <span>Browse Chairs</span>
                     </a>
@@ -347,27 +344,27 @@
         <!-- Marketplace Quick Access -->
         <div class="marketplace-quick-access">
             <div class="quick-access-grid">
-                <a href="marketplace.html#category-living-room" class="quick-access-item">
+                <a href="/marketplace#category-living-room" class="quick-access-item">
                     <i class="fas fa-couch"></i>
                     <span>Living Room</span>
                 </a>
-                <a href="marketplace.html#category-bedroom-sets" class="quick-access-item">
+                <a href="/marketplace#category-bedroom-sets" class="quick-access-item">
                     <i class="fas fa-bed"></i>
                     <span>Bedroom</span>
                 </a>
-                <a href="marketplace.html#category-tables" class="quick-access-item">
+                <a href="/marketplace#category-tables" class="quick-access-item">
                     <i class="fas fa-table"></i>
                     <span>Tables</span>
                 </a>
-                <a href="marketplace.html#category-chairs" class="quick-access-item">
+                <a href="/marketplace#category-chairs" class="quick-access-item">
                     <i class="fas fa-chair"></i>
                     <span>Chairs</span>
                 </a>
-                <a href="marketplace.html#category-custom" class="quick-access-item">
+                <a href="/marketplace#category-custom" class="quick-access-item">
                     <i class="fas fa-tools"></i>
                     <span>Custom</span>
                 </a>
-                <a href="marketplace.html" class="quick-access-item featured">
+                <a href="/marketplace" class="quick-access-item featured">
                     <i class="fas fa-store"></i>
                     <span>All Products</span>
                 </a>
