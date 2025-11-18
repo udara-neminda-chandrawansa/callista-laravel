@@ -185,7 +185,6 @@
                                 @php
                                 $stockClass = 'stock-medium';
                                 if($product->stock_status == 'out-of-stock') $stockClass = 'stock-out';
-                                elseif($product->stock_status == 'low-stock') $stockClass = 'stock-low';
                                 elseif($product->stock_status == 'in-stock') $stockClass = 'stock-high';
                                 @endphp
                                 <span class="stock-indicator {{ $stockClass }}"></span>
@@ -297,14 +296,13 @@
                     <select id="stock_status" name="stock_status" class="form-input" required>
                         <option value="">Select Status</option>
                         <option value="in_stock">In Stock</option>
-                        <option value="low_stock">Low Stock</option>
                         <option value="out_of_stock">Out of Stock</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="rating" class="form-label">Rating</label>
-                    <input type="number" id="rating" name="rating" class="form-input" min="0" max="5" step="0.1">
+                    <input type="number" id="rating" name="rating" class="form-input" min="0" max="5" step="1">
                 </div>
 
                 <div class="form-group full-width">
@@ -388,14 +386,13 @@
                     <select id="edit_stock_status" name="stock_status" class="form-input" required>
                         <option value="">Select Status</option>
                         <option value="in_stock">In Stock</option>
-                        <option value="low_stock">Low Stock</option>
                         <option value="out_of_stock">Out of Stock</option>
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label for="edit_rating" class="form-label">Rating</label>
-                    <input type="number" id="edit_rating" name="rating" class="form-input" min="0" max="5" step="0.1">
+                    <input type="number" id="edit_rating" name="rating" class="form-input" min="0" max="5" step="1">
                 </div>
 
                 <div class="form-group full-width">
@@ -414,339 +411,338 @@
 
 @push('styles')
 <style>
-/* Modal Styles */
-.modal {
-    display: none;
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0,0,0,0.5);
-    backdrop-filter: blur(5px);
-}
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        backdrop-filter: blur(5px);
+    }
 
-.modal-content {
-    background-color: white;
-    margin: 2% auto;
-    padding: 0;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 800px;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-    animation: modalSlideIn 0.3s ease-out;
-}
+    .modal-content {
+        background-color: white;
+        margin: 2% auto;
+        padding: 0;
+        border-radius: 12px;
+        width: 90%;
+        max-width: 800px;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        animation: modalSlideIn 0.3s ease-out;
+    }
 
-@keyframes modalSlideIn {
-    from { transform: translateY(-50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
-}
+    @keyframes modalSlideIn {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
 
-.modal-header {
-    background: var(--gradient-primary);
-    color: white;
-    padding: 1.5rem 2rem;
-    border-radius: 12px 12px 0 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    .modal-header {
+        background: var(--gradient-primary);
+        color: white;
+        padding: 1.5rem 2rem;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
 
-.modal-header h3 {
-    margin: 0;
-    font-size: 1.25rem;
-}
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.25rem;
+    }
 
-.modal-close {
-    font-size: 1.5rem;
-    cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.3s;
-}
+    .modal-close {
+        font-size: 1.5rem;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.3s;
+    }
 
-.modal-close:hover {
-    opacity: 1;
-}
+    .modal-close:hover {
+        opacity: 1;
+    }
 
-.modal-form {
-    padding: 2rem;
-}
+    .modal-form {
+        padding: 2rem;
+    }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-bottom: 2rem;
-}
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
 
-.form-group.full-width {
-    grid-column: 1 / -1;
-}
+    .form-group.full-width {
+        grid-column: 1 / -1;
+    }
 
-.form-label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: var(--dark-color);
-}
+    .form-label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: var(--dark-color);
+    }
 
-.form-input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 2px solid var(--border-color);
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s;
-}
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
 
-.form-input:focus {
-    outline: none;
-    border-color: var(--primary-color);
-}
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+    }
 
-textarea.form-input {
-    resize: vertical;
-    min-height: 100px;
-}
+    textarea.form-input {
+        resize: vertical;
+        min-height: 100px;
+    }
 
-.modal-footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid var(--border-color);
-}
+    .modal-footer {
+        display: flex;
+        justify-content: flex-end;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
 
-.btn-secondary {
-    padding: 0.75rem 1.5rem;
-    background: var(--light-gray);
-    color: var(--gray-color);
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
+    .btn-secondary {
+        padding: 0.75rem 1.5rem;
+        background: var(--light-gray);
+        color: var(--gray-color);
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
 
-.btn-secondary:hover {
-    background: #ddd;
-}
+    .btn-secondary:hover {
+        background: #ddd;
+    }
 
-.btn-primary {
-    padding: 0.75rem 1.5rem;
-    background: var(--gradient-primary);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s;
-}
+    .btn-primary {
+        padding: 0.75rem 1.5rem;
+        background: var(--gradient-primary);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
 
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-md);
-}
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
 </style>
 @endpush
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-$(document).ready(function() {
-    // Modal controls
-    $('.btn-add-product').click(function(e) {
-        e.preventDefault();
-        $('#addProductModal').fadeIn(300);
-    });
+    $(document).ready(function() {
+        // Modal controls
+        $('.btn-add-product').click(function(e) {
+            e.preventDefault();
+            $('#addProductModal').fadeIn(300);
+        });
 
-    $('.modal-close, .modal-cancel').click(function() {
-        $('.modal').fadeOut(300);
-        resetForms();
-    });
-
-    $(window).click(function(event) {
-        if ($(event.target).hasClass('modal')) {
+        $('.modal-close, .modal-cancel').click(function() {
             $('.modal').fadeOut(300);
             resetForms();
+        });
+
+        $(window).click(function(event) {
+            if ($(event.target).hasClass('modal')) {
+                $('.modal').fadeOut(300);
+                resetForms();
+            }
+        });
+
+        // Create Product
+        $('#addProductForm').submit(function(e) {
+            e.preventDefault();
+            
+            $.ajax({
+                url: '{{ route("admin.products.store") }}',
+                method: 'POST',
+                data: $(this).serialize(),
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#addProductModal').fadeOut(300);
+                        showNotification(response.message);
+                        resetForms();
+                        // Reload the page to refresh the products grid
+                        setTimeout(() => window.location.reload(), 1000);
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let errorMessage = 'Please fix the following errors:\n';
+                        Object.keys(errors).forEach(field => {
+                            errorMessage += `• ${errors[field][0]}\n`;
+                        });
+                        showNotification(errorMessage, 'error');
+                    } else {
+                        showNotification('Error creating product. Please try again.', 'error');
+                    }
+                }
+            });
+        });
+
+        // Edit Product
+        $('.btn-edit').click(function(e) {
+            e.preventDefault();
+            let productId = $(this).closest('.product-card').data('product-id');
+            
+            $.ajax({
+                url: `/admin/products/${productId}/edit`,
+                method: 'GET',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        let product = response.product;
+                        
+                        // Populate edit form
+                        $('#edit_product_id').val(product.id);
+                        $('#edit_name').val(product.name);
+                        $('#edit_type').val(product.type);
+                        $('#edit_new_price').val(product.new_price);
+                        $('#edit_old_price').val(product.old_price);
+                        $('#edit_color').val(product.color);
+                        $('#edit_vendor').val(product.vendor);
+                        $('#edit_weight').val(product.weight);
+                        $('#edit_size').val(product.size);
+                        $('#edit_stock_status').val(product.stock_status);
+                        $('#edit_rating').val(product.rating);
+                        $('#edit_description').val(product.description);
+                        
+                        $('#editProductModal').fadeIn(300);
+                    }
+                },
+                error: function() {
+                    showNotification('Error loading product data. Please try again.', 'error');
+                }
+            });
+        });
+
+        // Update Product
+        $('#editProductForm').submit(function(e) {
+            e.preventDefault();
+            let productId = $('#edit_product_id').val();
+            
+            $.ajax({
+                url: `/admin/products/${productId}`,
+                method: 'PUT',
+                data: $(this).serialize(),
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        $('#editProductModal').fadeOut(300);
+                        showNotification(response.message);
+                        resetForms();
+                        // Reload the page to refresh the products grid
+                        setTimeout(() => window.location.reload(), 1000);
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        let errorMessage = 'Please fix the following errors:\n';
+                        Object.keys(errors).forEach(field => {
+                            errorMessage += `• ${errors[field][0]}\n`;
+                        });
+                        showNotification(errorMessage, 'error');
+                    } else {
+                        showNotification('Error updating product. Please try again.', 'error');
+                    }
+                }
+            });
+        });
+
+        // Delete Product
+        $('.btn-delete').click(function(e) {
+            e.preventDefault();
+            let productId = $(this).closest('.product-card').data('product-id');
+            let productName = $(this).closest('.product-card').find('.product-name').text();
+            
+            Swal.fire({
+                title: 'Delete Product',
+                text: `Are you sure you want to delete "${productName}"? This action cannot be undone.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: `/admin/products/${productId}`,
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                showNotification(response.message);
+                                // Reload the page to refresh the products grid
+                                setTimeout(() => window.location.reload(), 1000);
+                            }
+                        },
+                        error: function() {
+                            showNotification('Error deleting product. Please try again.', 'error');
+                        }
+                    });
+                }
+            });
+        });
+
+        function resetForms() {
+            $('#addProductForm')[0].reset();
+            $('#editProductForm')[0].reset();
+        }
+
+        function showNotification(message, type = 'success') {
+            // Create notification element
+            const notification = $(`
+                <div class="notification ${type === 'error' ? 'notification-error' : 'notification-success'}">
+                    <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `);
+            
+            // Add to body
+            $('body').append(notification);
+            
+            // Show notification
+            setTimeout(() => notification.addClass('show'), 100);
+            
+            // Hide and remove notification
+            setTimeout(() => {
+                notification.removeClass('show');
+                setTimeout(() => notification.remove(), 300);
+            }, 4000);
         }
     });
-
-    // Create Product
-    $('#addProductForm').submit(function(e) {
-        e.preventDefault();
-        
-        $.ajax({
-            url: '{{ route("admin.products.store") }}',
-            method: 'POST',
-            data: $(this).serialize(),
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.success) {
-                    $('#addProductModal').fadeOut(300);
-                    showNotification(response.message);
-                    resetForms();
-                    // Reload the page to refresh the products grid
-                    setTimeout(() => window.location.reload(), 1000);
-                }
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    let errors = xhr.responseJSON.errors;
-                    let errorMessage = 'Please fix the following errors:\n';
-                    Object.keys(errors).forEach(field => {
-                        errorMessage += `• ${errors[field][0]}\n`;
-                    });
-                    showNotification(errorMessage, 'error');
-                } else {
-                    showNotification('Error creating product. Please try again.', 'error');
-                }
-            }
-        });
-    });
-
-    // Edit Product
-    $('.btn-edit').click(function(e) {
-        e.preventDefault();
-        let productId = $(this).closest('.product-card').data('product-id');
-        
-        $.ajax({
-            url: `/admin/products/${productId}/edit`,
-            method: 'GET',
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.success) {
-                    let product = response.product;
-                    
-                    // Populate edit form
-                    $('#edit_product_id').val(product.id);
-                    $('#edit_name').val(product.name);
-                    $('#edit_type').val(product.type);
-                    $('#edit_new_price').val(product.new_price);
-                    $('#edit_old_price').val(product.old_price);
-                    $('#edit_color').val(product.color);
-                    $('#edit_vendor').val(product.vendor);
-                    $('#edit_weight').val(product.weight);
-                    $('#edit_size').val(product.size);
-                    $('#edit_stock_status').val(product.stock_status);
-                    $('#edit_rating').val(product.rating);
-                    $('#edit_description').val(product.description);
-                    
-                    $('#editProductModal').fadeIn(300);
-                }
-            },
-            error: function() {
-                showNotification('Error loading product data. Please try again.', 'error');
-            }
-        });
-    });
-
-    // Update Product
-    $('#editProductForm').submit(function(e) {
-        e.preventDefault();
-        let productId = $('#edit_product_id').val();
-        
-        $.ajax({
-            url: `/admin/products/${productId}`,
-            method: 'PUT',
-            data: $(this).serialize(),
-            headers: {
-                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-            },
-            success: function(response) {
-                if (response.success) {
-                    $('#editProductModal').fadeOut(300);
-                    showNotification(response.message);
-                    resetForms();
-                    // Reload the page to refresh the products grid
-                    setTimeout(() => window.location.reload(), 1000);
-                }
-            },
-            error: function(xhr) {
-                if (xhr.status === 422) {
-                    let errors = xhr.responseJSON.errors;
-                    let errorMessage = 'Please fix the following errors:\n';
-                    Object.keys(errors).forEach(field => {
-                        errorMessage += `• ${errors[field][0]}\n`;
-                    });
-                    showNotification(errorMessage, 'error');
-                } else {
-                    showNotification('Error updating product. Please try again.', 'error');
-                }
-            }
-        });
-    });
-
-    // Delete Product
-    $('.btn-delete').click(function(e) {
-        e.preventDefault();
-        let productId = $(this).closest('.product-card').data('product-id');
-        let productName = $(this).closest('.product-card').find('.product-name').text();
-        
-        Swal.fire({
-            title: 'Delete Product',
-            text: `Are you sure you want to delete "${productName}"? This action cannot be undone.`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/admin/products/${productId}`,
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            showNotification(response.message);
-                            // Reload the page to refresh the products grid
-                            setTimeout(() => window.location.reload(), 1000);
-                        }
-                    },
-                    error: function() {
-                        showNotification('Error deleting product. Please try again.', 'error');
-                    }
-                });
-            }
-        });
-    });
-
-    function resetForms() {
-        $('#addProductForm')[0].reset();
-        $('#editProductForm')[0].reset();
-    }
-
-    function showNotification(message, type = 'success') {
-        // Create notification element
-        const notification = $(`
-            <div class="notification ${type === 'error' ? 'notification-error' : 'notification-success'}">
-                <i class="fas ${type === 'error' ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i>
-                <span>${message}</span>
-            </div>
-        `);
-        
-        // Add to body
-        $('body').append(notification);
-        
-        // Show notification
-        setTimeout(() => notification.addClass('show'), 100);
-        
-        // Hide and remove notification
-        setTimeout(() => {
-            notification.removeClass('show');
-            setTimeout(() => notification.remove(), 300);
-        }, 4000);
-    }
-});
 </script>
 @endpush
 
