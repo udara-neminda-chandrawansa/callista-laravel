@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\AdminController;
 
 /*
 |--------------------------------------------------------------------------
@@ -44,12 +46,32 @@ Route::get('/cart', function () {
     return view('public-site.cart');
 })->name('cart');
 
+// Admin Login Route
+Route::get('admin/login', [AdminController::class, 'login'])->name('admin.login');
+
 Route::middleware([
     'auth:sanctum',
     config('jetstream.auth_session'),
     'verified',
 ])->group(function () {
+    
+    // Main dashboard route - redirects based on role
     Route::get('/dashboard', function () {
-        return view('public-site.dashboard');
+        $user = auth()->user();
+        
+        if ($user->role === 'admin') {
+            return redirect()->route('admin.dashboard');
+        } else {
+            return redirect()->route('user.dashboard');
+        }
     })->name('dashboard');
+    
+    // User Dashboard
+    Route::get('/user/dashboard', [UserController::class, 'dashboard'])->name('user.dashboard');
+    
+    // Admin Dashboard (with admin check)
+    Route::get('/admin/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/admin/users', [AdminController::class, 'users'])->name('admin.users');
+    Route::get('/admin/products', [AdminController::class, 'products'])->name('admin.products');
+    Route::get('/admin/orders', [AdminController::class, 'orders'])->name('admin.orders');
 });

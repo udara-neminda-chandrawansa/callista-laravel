@@ -71,8 +71,13 @@
 
 <body class="auth-body">
     <!-- Back Button -->
-    <a href="/" class="back-home">
-        <i class="fas fa-arrow-left"></i> Back to Home
+    <a href="@if(request()->routeIs('admin.login')) /admin/login @else / @endif" class="back-home">
+        <i class="fas fa-arrow-left"></i> 
+        @if(request()->routeIs('admin.login'))
+            Back to Admin
+        @else
+            Back to Home
+        @endif
     </a>
 
     <div class="auth-container">
@@ -98,8 +103,20 @@
         <div class="auth-right">
             <div class="auth-form-container">
                 <div class="auth-header">
-                    <h2>Sign In</h2>
-                    <p>Enter your credentials to access your account</p>
+                    <h2>
+                        @if(request()->routeIs('admin.login'))
+                            Admin Sign In
+                        @else
+                            Sign In
+                        @endif
+                    </h2>
+                    <p>
+                        @if(request()->routeIs('admin.login'))
+                            Enter your admin credentials to access the admin panel
+                        @else
+                            Enter your credentials to access your account
+                        @endif
+                    </p>
                 </div>
 
                 <!-- Social Login -->

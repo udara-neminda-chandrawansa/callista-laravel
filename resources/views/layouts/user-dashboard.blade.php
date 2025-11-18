@@ -495,10 +495,10 @@
             <aside class="dashboard-sidebar">
                 <div class="user-profile">
                     <div class="user-avatar">
-                        AM
+                        {{ strtoupper(substr($userData['user']['name'], 0, 1) . substr(strrchr($userData['user']['name'], ' '), 1, 1)) }}
                     </div>
-                    <div class="user-name">Amara Mendis</div>
-                    <div class="user-email">amara.mendis@email.com</div>
+                    <div class="user-name">{{ $userData['user']['name'] }}</div>
+                    <div class="user-email">{{ $userData['user']['email'] }}</div>
                 </div>
 
                 <nav>
@@ -543,7 +543,7 @@
                             <form action="{{ route('logout') }}" method="POST">
                                 @csrf
                                 <button type="submit" class="nav-link" style="width: 100%">
-                                    <i class="nav-icon fas fa-home"></i>
+                                    <i class="nav-icon fas fa-sign-out-alt"></i>
                                     <span>Logout</span>
                                 </button>
                             </form>

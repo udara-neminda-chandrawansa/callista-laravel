@@ -72,24 +72,24 @@
                             </div>
                             <div class="user-details">
                                 <div class="user-name" id="userName">{{ $userName }}</div>
-                                <div class="user-email" id="userEmail">{{ $userName }}</div>
+                                <div class="user-email" id="userEmail">{{ $userEmail }}</div>
                             </div>
                         </div>
 
                         <div class="user-menu">
-                            <a href="/dashboard" class="user-menu-item">
+                            <a href="user/dashboard" class="user-menu-item">
                                 <i class="fas fa-tachometer-alt"></i>
                                 <span>Dashboard</span>
                             </a>
-                            <a href="/dashboard#orders" class="user-menu-item">
+                            <a href="user/dashboard#orders" class="user-menu-item">
                                 <i class="fas fa-shopping-bag"></i>
                                 <span>My Orders</span>
                             </a>
-                            <a href="/dashboard#favorites" class="user-menu-item">
+                            <a href="user/dashboard#favorites" class="user-menu-item">
                                 <i class="fas fa-heart"></i>
                                 <span>Favorites</span>
                             </a>
-                            <a href="/dashboard#profile" class="user-menu-item">
+                            <a href="user/dashboard#profile" class="user-menu-item">
                                 <i class="fas fa-user-cog"></i>
                                 <span>Profile Settings</span>
                             </a>

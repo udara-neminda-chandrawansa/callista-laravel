@@ -5,7 +5,7 @@
 <!-- Main Content -->
 <main class="dashboard-main">
     <div class="dashboard-header">
-        <h1 class="dashboard-title">Welcome back, Amara!</h1>
+        <h1 class="dashboard-title">Welcome back, {{ $userData['user']['name'] }}!</h1>
         <p class="dashboard-subtitle">Here's what's happening with your account</p>
     </div>
 
@@ -179,32 +179,32 @@
         <div class="account-info">
             <div class="info-group">
                 <div class="info-label">Full Name</div>
-                <div class="info-value">Amara Mendis</div>
+                <div class="info-value">{{ $userData['user']['name'] }}</div>
             </div>
 
             <div class="info-group">
                 <div class="info-label">Email Address</div>
-                <div class="info-value">amara.mendis@email.com</div>
+                <div class="info-value">{{ $userData['user']['email'] }}</div>
             </div>
 
             <div class="info-group">
                 <div class="info-label">Phone Number</div>
-                <div class="info-value">+94 77 123 4567</div>
+                <div class="info-value"></div>
             </div>
 
             <div class="info-group">
                 <div class="info-label">Member Since</div>
-                <div class="info-value">January 2024</div>
+                <div class="info-value">{{ $userData['user']['created_at'] }}</div>
             </div>
 
             <div class="info-group">
                 <div class="info-label">Delivery Address</div>
-                <div class="info-value">123 Main Street, Colombo 07, Sri Lanka</div>
+                <div class="info-value"></div>
             </div>
 
             <div class="info-group">
                 <div class="info-label">Account Status</div>
-                <div class="info-value">Premium Member</div>
+                <div class="info-value"></div>
             </div>
         </div>
 
