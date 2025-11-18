@@ -1,3 +1,12 @@
+@php
+    $isAuthenticated = Auth::check();
+    $user = $isAuthenticated ? Auth::user() : null;
+    $userName = $isAuthenticated ? $user->name : '';
+    $userEmail = $isAuthenticated ? $user->email : '';
+    $userAvatar = $isAuthenticated && $user->profile_photo_path ? asset('storage/' . $user->profile_photo_path) : asset('assets/images/default-avatar.png');
+    $userInitials = $isAuthenticated ? strtoupper(substr($userName, 0, 1) . substr(strrchr($userName, ' '), 1, 1)) : '';
+@endphp
+
 <!-- Navigation -->
 <nav class="navbar">
     <div class="nav-container">
@@ -41,7 +50,7 @@
                     </div>
 
                     <!-- Logged Out State -->
-                    <div class="user-auth-section" id="userAuthSection">
+                    <div class="user-auth-section" id="userAuthSection" style="{{ $isAuthenticated ? 'display: none;' : '' }}">
                         <div class="auth-buttons">
                             <a href="/login" class="auth-btn login-btn">
                                 <i class="fas fa-sign-in-alt"></i>
@@ -55,15 +64,15 @@
                     </div>
 
                     <!-- Logged In State (Hidden by default) -->
-                    <div class="user-profile-section" id="userProfileSection" style="display: none;">
+                    <div class="user-profile-section" id="userProfileSection" style="{{ $isAuthenticated ? '' : 'display: none;' }}">
                         <div class="user-info">
                             <div class="user-avatar">
                                 <img src="{{ asset('assets/images/default-avatar.png') }}" alt="User Avatar" id="userAvatar">
-                                <div class="user-avatar-fallback">AM</div>
+                                <div class="user-avatar-fallback">{{ $userInitials }}</div>
                             </div>
                             <div class="user-details">
-                                <div class="user-name" id="userName">Amara Mendis</div>
-                                <div class="user-email" id="userEmail">amara@email.com</div>
+                                <div class="user-name" id="userName">{{ $userName }}</div>
+                                <div class="user-email" id="userEmail">{{ $userName }}</div>
                             </div>
                         </div>
 
@@ -85,10 +94,13 @@
                                 <span>Profile Settings</span>
                             </a>
                             <div class="user-menu-divider"></div>
-                            <button class="user-menu-item logout-btn" id="logoutBtn">
+                            <form action="{{ route('logout') }}" method="POST">
+                            @csrf
+                            <button type="submit" class="user-menu-item logout-btn" id="logoutBtn">
                                 <i class="fas fa-sign-out-alt"></i>
                                 <span>Sign Out</span>
                             </button>
+                            </form>
                         </div>
                     </div>
 

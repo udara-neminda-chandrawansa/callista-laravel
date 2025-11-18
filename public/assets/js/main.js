@@ -822,56 +822,56 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Update UI based on login status
-    function updateUserInterface() {
-        if (isLoggedIn && userData.name) {
-            // Show logged in state
-            if (userAuthSection) userAuthSection.style.display = 'none';
-            if (userProfileSection) {
-                userProfileSection.style.display = 'block';
+    // function updateUserInterface() {
+    //     if (isLoggedIn && userData.name) {
+    //         // Show logged in state
+    //         if (userAuthSection) userAuthSection.style.display = 'none';
+    //         if (userProfileSection) {
+    //             userProfileSection.style.display = 'block';
                 
-                // Update user info
-                const userName = document.getElementById('userName');
-                const userEmail = document.getElementById('userEmail');
-                const userAvatarFallback = document.querySelector('.user-avatar-fallback');
+    //             // Update user info
+    //             const userName = document.getElementById('userName');
+    //             const userEmail = document.getElementById('userEmail');
+    //             const userAvatarFallback = document.querySelector('.user-avatar-fallback');
                 
-                if (userName) userName.textContent = userData.name;
-                if (userEmail) userEmail.textContent = userData.email;
-                if (userAvatarFallback) {
-                    userAvatarFallback.textContent = userData.name.split(' ')
-                        .map(n => n[0]).join('').toUpperCase();
-                }
-            }
-        } else {
-            // Show logged out state
-            if (userAuthSection) userAuthSection.style.display = 'block';
-            if (userProfileSection) userProfileSection.style.display = 'none';
-        }
-    }
+    //             if (userName) userName.textContent = userData.name;
+    //             if (userEmail) userEmail.textContent = userData.email;
+    //             if (userAvatarFallback) {
+    //                 userAvatarFallback.textContent = userData.name.split(' ')
+    //                     .map(n => n[0]).join('').toUpperCase();
+    //             }
+    //         }
+    //     } else {
+    //         // Show logged out state
+    //         if (userAuthSection) userAuthSection.style.display = 'block';
+    //         if (userProfileSection) userProfileSection.style.display = 'none';
+    //     }
+    // }
     
     // Handle logout
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function(e) {
-            e.preventDefault();
+    // if (logoutBtn) {
+    //     logoutBtn.addEventListener('click', function(e) {
+    //         e.preventDefault();
             
-            // Clear user data
-            localStorage.removeItem('userLoggedIn');
-            localStorage.removeItem('userData');
+    //         // Clear user data
+    //         localStorage.removeItem('userLoggedIn');
+    //         localStorage.removeItem('userData');
             
-            // Update state
-            isLoggedIn = false;
-            userData = {};
+    //         // Update state
+    //         isLoggedIn = false;
+    //         userData = {};
             
-            // Update UI
-            updateUserInterface();
+    //         // Update UI
+    //         updateUserInterface();
             
-            // Close dropdown
-            userDropdown.classList.remove('active');
-            userAccountBtn.classList.remove('active');
+    //         // Close dropdown
+    //         userDropdown.classList.remove('active');
+    //         userAccountBtn.classList.remove('active');
             
-            // Show logout message
-            showNotification('Successfully logged out!', 'success');
-        });
-    }
+    //         // Show logout message
+    //         showNotification('Successfully logged out!', 'success');
+    //     });
+    // }
     
     // Simulate login for demo (you can remove this in production)
     function simulateLogin(name, email) {
