@@ -215,8 +215,9 @@
                             <div class="stat-value">
                                 @php
                                 $stockClass = 'stock-medium';
-                                if($product->stock_status == 'out-of-stock') $stockClass = 'stock-out';
-                                elseif($product->stock_status == 'in-stock') $stockClass = 'stock-high';
+                                if($product->stock_status == 'out_of_stock') $stockClass = 'stock-out';
+                                elseif($product->stock_status == 'low_stock') $stockClass = 'stock-low';
+                                elseif($product->stock_status == 'in_stock') $stockClass = 'stock-high';
                                 @endphp
                                 <span class="stock-indicator {{ $stockClass }}"></span>
                                 {{ ucwords(str_replace('-', ' ', $product->stock_status)) }}
