@@ -16,20 +16,29 @@
 
         // Refresh cart table content
         function refreshCartTable() {
-            $.get('/cart/table', function(html) {
-                if ($('#cartTableBody').length) {
-                    $('#cartTableBody').html(html);
-                }
-            }).fail(function() {
-                console.log('Cart table refresh not available');
-            });
+            // Check if we're on the cart page
+            if (window.location.pathname === '/cart') {
+                // If on cart page, reload the page to show updated content
+                setTimeout(function() {
+                    location.reload();
+                }, 500);
+            } else {
+                // For other pages, try to get cart table content
+                $.get('/cart/table', function(response) {
+                    if ($('#cartTableBody').length && response.html) {
+                        $('#cartTableBody').html(response.html);
+                    }
+                }).fail(function() {
+                    console.log('Cart table refresh not available');
+                });
+            }
         }
 
         // Refresh cart sidebar/dropdown content
         function refreshCartList() {
-            $.get('/cart/list', function(html) {
-                if ($('#cart_container').length) {
-                    $('#cart_container').html(html);
+            $.get('/cart/list', function(response) {
+                if ($('#cart_container').length && response.html) {
+                    $('#cart_container').html(response.html);
                 }
             }).fail(function() {
                 console.log('Cart list refresh not available');

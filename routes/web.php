@@ -86,9 +86,7 @@ Route::get('/contact', function () {
     return view('public-site.contact');
 })->name('contact');
 
-Route::get('/cart', function () {
-    return view('public-site.cart');
-})->name('cart');
+Route::get('/cart', [CartController::class, 'index'])->name('cart');
 
 // Product API routes for AJAX
 Route::get('/api/products', [ProductController::class, 'getProducts'])->name('api.products');
@@ -102,6 +100,8 @@ Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remov
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
 Route::get('/cart/count', [CartController::class, 'getCount'])->name('cart.count');
 Route::get('/cart/total', [CartController::class, 'getTotal'])->name('cart.total');
+Route::get('/cart/table', [CartController::class, 'getTable'])->name('cart.table');
+Route::get('/cart/list', [CartController::class, 'getList'])->name('cart.list');
 
 // Wishlist routes
 Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('wishlist.add');

@@ -180,4 +180,76 @@ class CartController extends Controller
             'items' => Cart::getContent()
         ]);
     }
+
+    /**
+     * Display cart page
+     */
+    public function index()
+    {
+        $cartItems = Cart::getContent();
+        $cartTotal = Cart::getTotal();
+        $cartCount = Cart::getTotalQuantity();
+        $subtotal = $cartItems->sum(function ($item) {
+            return $item->quantity * $item->price;
+        });
+        
+        // Calculate discount (difference between old prices and current prices)
+        $totalDiscount = $cartItems->sum(function ($item) {
+            $oldPrice = $item->attributes->old_price ?? 0;
+            if ($oldPrice > 0) {
+                return $item->quantity * ($oldPrice - $item->price);
+            }
+            return 0;
+        });
+
+        $deliveryFee = $subtotal > 50000 ? 0 : 1500; // Free delivery over Rs. 50,000
+        $finalTotal = $subtotal - $totalDiscount + $deliveryFee;
+
+        $recommendedProducts = Product::with('images')
+            ->where('stock_status', '!=', 'out_of_stock')
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
+        return view('public-site.cart', compact(
+            'cartItems', 
+            'cartTotal', 
+            'cartCount', 
+            'subtotal', 
+            'totalDiscount', 
+            'deliveryFee', 
+            'finalTotal',
+            'recommendedProducts'
+        ));
+    }
+
+    /**
+     * Get cart table partial for AJAX updates
+     */
+    public function getTable()
+    {
+        $cartItems = Cart::getContent();
+        // For now, return JSON response - can create partial view later
+        return response()->json([
+            'success' => true,
+            'html' => '', // Will be implemented when partial views are created
+            'items' => $cartItems
+        ]);
+    }
+
+    /**
+     * Get cart list/sidebar for AJAX updates
+     */
+    public function getList()
+    {
+        $cartItems = Cart::getContent();
+        $cartTotal = Cart::getTotal();
+        // For now, return JSON response - can create partial view later
+        return response()->json([
+            'success' => true,
+            'html' => '', // Will be implemented when partial views are created
+            'items' => $cartItems,
+            'total' => $cartTotal
+        ]);
+    }
 }
