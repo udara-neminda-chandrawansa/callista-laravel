@@ -188,12 +188,14 @@
 
 @push('scripts')
 <script>
+// Global variable for selected files
+let selectedFiles = [];
+
 // File upload functionality
 document.addEventListener('DOMContentLoaded', function() {
     const fileUploadArea = document.getElementById('fileUploadArea');
     const fileInput = document.getElementById('referenceImages');
     const uploadedFilesDiv = document.getElementById('uploadedFiles');
-    let selectedFiles = [];
 
     // Click to upload
     fileUploadArea.addEventListener('click', function() {
@@ -306,11 +308,19 @@ document.getElementById('customForm').addEventListener('submit', function(e) {
     formData.append('designDescription', document.getElementById('designDescription').value);
     formData.append('budget', document.getElementById('budget').value);
     
-    // Add files manually from selectedFiles array
-    if (typeof selectedFiles !== 'undefined' && selectedFiles.length > 0) {
+    // Add files from both selectedFiles array and file input as fallback
+    if (selectedFiles && selectedFiles.length > 0) {
         selectedFiles.forEach((file, index) => {
             formData.append('referenceImages[]', file);
         });
+    } else {
+        // Fallback: get files from file input
+        const fileInput = document.getElementById('referenceImages');
+        if (fileInput.files && fileInput.files.length > 0) {
+            Array.from(fileInput.files).forEach(file => {
+                formData.append('referenceImages[]', file);
+            });
+        }
     }
     
     // Submit the form

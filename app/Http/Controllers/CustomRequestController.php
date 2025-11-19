@@ -51,7 +51,7 @@ class CustomRequestController extends Controller
                 
                 // Handle array of files
                 if (is_array($files)) {
-                    foreach ($files as $image) {
+                    foreach ($files as $index => $image) {
                         if ($image && $image->isValid()) {
                             // Generate unique filename
                             $filename = time() . '_' . uniqid() . '.' . $image->getClientOriginalExtension();
