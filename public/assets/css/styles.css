@@ -2277,3 +2277,44 @@ img {
     }
   }
 }
+
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 2rem;
+}
+
+.pagination-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--border-color);
+    background: white;
+    color: var(--gray-color);
+    text-decoration: none;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.pagination-btn:hover,
+.pagination-btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.pagination-btn.disabled {
+    background: var(--light-gray);
+    color: var(--gray-color);
+    border-color: var(--border-color);
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.pagination-btn.disabled:hover {
+    background: var(--light-gray);
+    color: var(--gray-color);
+    border-color: var(--border-color);
+    transform: none;
+}

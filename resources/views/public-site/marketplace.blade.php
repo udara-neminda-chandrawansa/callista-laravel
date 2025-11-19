@@ -79,7 +79,8 @@
             <div class="section-nav">
                 <button class="tab-btn active" data-filter="all">All</button>
                 @foreach($categories->take(5) as $category)
-                    <button class="tab-btn" data-filter="{{ $category }}">{{ ucfirst(str_replace('-', ' ', $category)) }}</button>
+                <button class="tab-btn" data-filter="{{ $category }}">{{ ucfirst(str_replace('-', ' ', $category))
+                    }}</button>
                 @endforeach
             </div>
         </div>
@@ -123,10 +124,10 @@
                             <span class="option-text">All Categories</span>
                         </label>
                         @foreach($categories as $category)
-                            <label class="filter-option">
-                                <input type="radio" name="category" value="{{ $category }}">
-                                <span class="option-text">{{ ucfirst(str_replace('-', ' ', $category)) }}</span>
-                            </label>
+                        <label class="filter-option">
+                            <input type="radio" name="category" value="{{ $category }}">
+                            <span class="option-text">{{ ucfirst(str_replace('-', ' ', $category)) }}</span>
+                        </label>
                         @endforeach
                     </div>
                 </div>
@@ -204,33 +205,30 @@
                     </div>
                 </div>
                 <!-- Products Grid -->
-                                <!-- Products Grid -->
+                <!-- Products Grid -->
                 <div class="products-grid" id="marketplace-products-grid">
                     @forelse($products as $index => $product)
-                        <x-product-card 
-                            :product="$product" 
-                            :badge-text="$product->old_price && $product->old_price > $product->new_price ? 'Sale' : ($product->rating >= 4.5 ? 'Popular' : ($product->created_at->diffInDays() <= 30 ? 'New' : 'Featured'))"
-                            :classes="$product->type"
-                            data-aos="fade-up" 
-                            data-aos-delay="{{ ($index % 4) * 100 }}"
-                        />
+                    <x-product-card :product="$product"
+                        :badge-text="$product->old_price && $product->old_price > $product->new_price ? 'Sale' : ($product->rating >= 4.5 ? 'Popular' : ($product->created_at->diffInDays() <= 30 ? 'New' : 'Featured'))"
+                        :classes="$product->type" data-aos="fade-up" data-aos-delay="{{ ($index % 4) * 100 }}" />
                     @empty
-                        <div class="no-products" style="grid-column: 1 / -1; text-align: center; padding: 80px 40px;">
-                            <i class="fas fa-search-minus" style="font-size: 4rem; color: #d1d5db; margin-bottom: 24px;"></i>
-                            <h3 style="color: #6b7280; margin-bottom: 12px; font-size: 1.5rem;">No Products Found</h3>
-                            <p style="color: #9ca3af; margin-bottom: 24px;">Try adjusting your filters or search terms</p>
-                            <button class="btn btn-primary" onclick="resetAllFilters()">
-                                <i class="fas fa-redo"></i> Reset All Filters
-                            </button>
-                        </div>
+                    <div class="no-products" style="grid-column: 1 / -1; text-align: center; padding: 80px 40px;">
+                        <i class="fas fa-search-minus"
+                            style="font-size: 4rem; color: #d1d5db; margin-bottom: 24px;"></i>
+                        <h3 style="color: #6b7280; margin-bottom: 12px; font-size: 1.5rem;">No Products Found</h3>
+                        <p style="color: #9ca3af; margin-bottom: 24px;">Try adjusting your filters or search terms</p>
+                        <button class="btn btn-primary" onclick="resetAllFilters()">
+                            <i class="fas fa-redo"></i> Reset All Filters
+                        </button>
+                    </div>
                     @endforelse
                 </div>
-                
+
                 <!-- Pagination -->
                 @if($products->hasPages())
-                    <div class="pagination-wrapper" style="margin-top: 40px;">
-                        {{ $products->links() }}
-                    </div>
+                <div class="pagination-wrapper" style="margin-top: 40px;">
+                    {{ $products->links('vendor.pagination.admin-pagination') }}
+                </div>
                 @endif
 
                 <!-- No Results Message -->
@@ -246,11 +244,11 @@
             </main>
         </div>
 
-        <div class="section-footer" data-aos="fade-up" style="margin-top: 3rem;">
+        {{-- <div class="section-footer" data-aos="fade-up" style="margin-top: 3rem;">
             <a href="/collection" class="btn btn-primary">
                 View All Products <i class="fas fa-arrow-right"></i>
             </a>
-        </div>
+        </div> --}}
     </div>
 </section>
 
