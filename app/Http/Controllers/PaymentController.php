@@ -105,21 +105,27 @@ class PaymentController extends Controller
     {
         Log::info('Checkout Request Received', $request->all()); // Debug log
 
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'company_name' => 'nullable|string|max:255',
-            'address_1' => 'required|string|max:255',
-            'address_2' => 'nullable|string|max:255',
-            'town' => 'required|string|max:255',
-            'postal_code' => 'required|string|max:255',
-            'phone' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'notes' => 'nullable|string|max:1000',
-            'payment_method' => 'required|in:bank_transfer,card_payment,cash_on_delivery',
-            'payment_slip' => 'required_if:payment_method,bank_transfer|nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
-        ]);
-
+        try {
+            $request->validate([
+                'first_name' => 'required|string|max:255',
+                'last_name' => 'required|string|max:255',
+                'company_name' => 'nullable|string|max:255',
+                'address_1' => 'required|string|max:255',
+                'address_2' => 'nullable|string|max:255',
+                'town' => 'required|string|max:255',
+                'postal_code' => 'required|string|max:255',
+                'phone' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'notes' => 'nullable|string|max:1000',
+                'payment_method' => 'required|in:bank_transfer,card_payment,cash_on_delivery',
+            ]);
+            
+            Log::info('Validation passed successfully'); // Debug log
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            Log::error('Validation failed: ', $e->errors());
+            return back()->withErrors($e->errors())->withInput();
+        }
+        
         // Get cart items based on user authentication
         if (Auth::check()) {
             $userId = Auth::id();
@@ -130,27 +136,37 @@ class PaymentController extends Controller
                 return redirect()->route('cart')->with('error', 'Your cart is empty.');
             }
             Log::info('User ID for checkout: ' . $userId); // Debug log
+            Log::info('Cart items count: ' . $cartItems->count()); // Debug log
         } else {
             return redirect()->route('login')->with('error', 'Please login to complete your order.');
         }
 
         // Calculate total from cart items
-        $total = 0;
+        $subtotal = 0;
+        $totalDiscount = 0;
         $orderItems = [];
         
         foreach ($cartItems as $item) {
             $product = Product::find($item->item_id);
             if (!$product) {
+                Log::error('Product not found: ' . $item->item_id);
                 return redirect()->route('cart')->with('error', 'Some products in your cart are no longer available.');
             }
             
             // Check stock availability
             if ($product->stock_status === 'out_of_stock') {
+                Log::error('Product out of stock: ' . $product->name);
                 return redirect()->route('cart')->with('error', "Product '{$product->name}' is out of stock.");
             }
             
             $itemTotal = $product->new_price * $item->quantity;
-            $total += $itemTotal;
+            $subtotal += $itemTotal;
+            
+            // Calculate discount for this item
+            if ($product->old_price && $product->old_price > $product->new_price) {
+                $itemDiscount = $item->quantity * ($product->old_price - $product->new_price);
+                $totalDiscount += $itemDiscount;
+            }
             
             $orderItems[] = [
                 'product' => $product,
@@ -159,9 +175,15 @@ class PaymentController extends Controller
                 'total' => $itemTotal
             ];
         }
+        
+        // Calculate delivery fee and final total
+        $deliveryFee = $subtotal > 50000 ? 0 : 1500; // Free delivery over Rs. 50,000
+        $total = $subtotal - $totalDiscount + $deliveryFee;
 
-        Log::info('Checkout Total: ', $total); // Debug log
+        Log::info('Checkout Total: ' . $total); // Debug log
 
+        Log::info('Starting database transaction'); // Debug log
+        
         DB::beginTransaction();
 
         try {
@@ -170,23 +192,10 @@ class PaymentController extends Controller
             $nextNumber = $latestOrder ? intval(substr($latestOrder->order_code, 3)) + 1 : 1;
             $orderCode = 'CAL' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
 
-            Log::info('Order Code: ', $orderCode); // Debug log
+            Log::info('Order Code: ' . $orderCode); // Debug log
 
-            // Handle payment slip upload
+            // Payment slip handling (for bank transfer - to be implemented in form later)
             $paymentSlipPath = null;
-            if ($request->hasFile('payment_slip')) {
-                $slip = $request->file('payment_slip');
-                $slipName = $orderCode . '_' . time() . '.' . $slip->getClientOriginalExtension();
-                
-                // Create directory if it doesn't exist
-                $uploadPath = public_path('uploads/payment_slips');
-                if (!file_exists($uploadPath)) {
-                    mkdir($uploadPath, 0755, true);
-                }
-                
-                $slip->move($uploadPath, $slipName);
-                $paymentSlipPath = 'uploads/payment_slips/' . $slipName;
-            }
 
             // Save or update billing data for logged-in users
             if (Auth::check()) {
@@ -207,26 +216,45 @@ class PaymentController extends Controller
                 );
             }
 
-            // Create the order
-            $order = UserOrder::create([
-                'order_code' => $orderCode,
-                'user_id' => $userId,
+            // Prepare billing data
+            $billingData = [
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
-                'company' => $request->company,
-                'address_line1' => $request->address_line1,
-                'address_line2' => $request->address_line2,
-                'city' => $request->city,
-                'province' => $request->province,
+                'company_name' => $request->company_name,
+                'address_1' => $request->address_1,
+                'address_2' => $request->address_2,
+                'town' => $request->town,
                 'postal_code' => $request->postal_code,
                 'phone' => $request->phone,
                 'email' => $request->email,
-                'notes' => $request->notes,
-                'payment_method' => $request->payment_method,
-                'payment_slip' => $paymentSlipPath,
-                'total_amount' => $total,
-                'order_status' => 'pending',
-                'payment_status' => $request->payment_method === 'card_payment' ? 'pending' : 'completed',
+            ];
+
+            // Prepare cart data for storage
+            $cartData = [
+                'items' => $orderItems,
+                'subtotal' => $subtotal,
+                'discount' => $totalDiscount,
+                'delivery_fee' => $deliveryFee,
+                'total' => $total,
+            ];
+
+            // Prepare payment data
+            $paymentData = [
+                'method' => $request->payment_method,
+                'status' => $request->payment_method === 'card_payment' ? 'pending' : 'completed',
+                'order_code' => $orderCode,
+            ];
+
+            // Create the order
+            $order = UserOrder::create([
+                'user_id' => $userId,
+                'contact_info' => $request->phone . ' | ' . $request->email,
+                'billing_data' => $billingData,
+                'order_notes' => $request->notes ?? '',
+                'cart_data' => $cartData,
+                'payment_mode' => $request->payment_method,
+                'payment_data' => $paymentData,
+                'status' => false, // 0 = pending, 1 = completed
             ]);
 
             // Create order items and update stock
@@ -247,17 +275,11 @@ class PaymentController extends Controller
             if ($request->payment_method === 'card_payment') {
                 // Redirect to PayHere
                 $merchant_id = env('PAYHERE_MERCHANT_ID');
-
                 $merchant_secret = env('PAYHERE_MERCHANT_SECRET');
                 $currency = 'LKR';
 
                 $amount = number_format($total, 2, '.', '');
-                $order_id = $orderCode;
-
-                // Prepare hash
-                $hash = strtoupper(md5(
-                    $merchant_id . $order_id . $amount . $currency . strtoupper(md5($merchant_secret))
-                ));
+                $order_id = $order->id; // Use the actual order ID from database
 
                 $payment = [
                     "merchant_id" => $merchant_id,
@@ -265,15 +287,15 @@ class PaymentController extends Controller
                     "cancel_url" => route('payment.cancel'),
                     "notify_url" => route('payment.notify'),
                     "order_id" => $order_id,
-                    "items" => 'Order #' . $order_id,
+                    "items" => 'Order #' . $orderCode,
                     "currency" => "LKR",
                     "amount" => $amount,
                     "first_name" => $request->first_name,
                     "last_name" => $request->last_name,
                     "email" => $request->email,
                     "phone" => $request->phone,
-                    "address" => $request->address_line1,
-                    "city" => $request->city,
+                    "address" => $request->address_1,
+                    "city" => $request->town,
                     "country" => "Sri Lanka",
                 ];
 
@@ -282,10 +304,13 @@ class PaymentController extends Controller
                     $merchant_id . $payment['order_id'] . $payment['amount'] . $payment['currency'] . strtoupper(md5($merchant_secret))
                 ));
 
+                Log::info('PayHere payment data prepared for order: ' . $orderCode);
+
                 return view('payhere.redirect', compact('payment'));
             }
 
-            return redirect()->route('home')->with('success', 'Order placed successfully!');
+            Log::info('Order placed successfully for order: ' . $orderCode);
+            return redirect()->route('home')->with('success', 'Order placed successfully! Order Code: ' . $orderCode);
         } catch (\Exception $e) {
             DB::rollBack();
 
@@ -356,20 +381,21 @@ class PaymentController extends Controller
 
         // Step 5: Handle completed payment (status 2 = success)
         if ((int) $status === 2) {
-            $order = UserOrder::where('order_code', $order_id)->first();
+            $order = UserOrder::find($order_id);
 
             if ($order) {
-                if ($order->payment_status !== 'completed') {
-                    $order->payment_status = 'completed';
-                    $order->order_status = 'processing'; // Update order status
-                    $order->save();
+                // Update payment data to mark as completed
+                $paymentData = $order->payment_data;
+                $paymentData['status'] = 'completed';
+                $paymentData['payhere_transaction_id'] = $request->payment_id ?? null;
+                
+                $order->payment_data = $paymentData;
+                $order->status = true; // Mark order as completed
+                $order->save();
 
-                    Log::info("Order #{$order->order_code} payment marked as completed.");
-                } else {
-                    Log::info("Order #{$order->order_code} payment already completed.");
-                }
+                Log::info("Order ID {$order->id} payment marked as completed.");
             } else {
-                Log::warning("Order not found for order_code: {$order_id}");
+                Log::warning("Order not found for ID: {$order_id}");
             }
         } else {
             Log::info("Payment not completed. Status: {$status}, Order ID: {$order_id}");
