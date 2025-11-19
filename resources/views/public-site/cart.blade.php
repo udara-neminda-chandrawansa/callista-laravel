@@ -266,12 +266,16 @@
         </div>
     </div>
 </section>
+
 <!-- Product Modal -->
 <x-product-modal />
+
+@push('scripts')
+
 <!-- Include cart/wishlist logic -->
 @include('public-site.partials.cw-logic')
-@push('scripts')
 @include('public-site.partials.cw-logic2')
+
 <script>
     $(document).ready(function() {
     // Function to refresh cart page content

@@ -14,6 +14,14 @@
 
     $(document).ready(function() {
 
+        function logCart(){
+            $.get('/cart/list', function(response) {
+                console.log(response);
+            }).fail(function() {
+                console.log('Failed to fetch cart list');
+            });
+        }
+
         // Refresh cart table content
         function refreshCartTable() {
             // Check if we're on the cart page
@@ -40,6 +48,7 @@
                 if ($('#cart_container').length && response.html) {
                     $('#cart_container').html(response.html);
                 }
+                console.log(response.items);
             }).fail(function() {
                 console.log('Cart list refresh not available');
             });
@@ -239,6 +248,8 @@
                         timer: 2000,
                         showConfirmButton: false
                     });
+
+                    logCart();
                 },
                 error: function(xhr) {
                     handleAjaxError(xhr);

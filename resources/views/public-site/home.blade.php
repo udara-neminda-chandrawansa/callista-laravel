@@ -340,11 +340,12 @@
 <!-- Product Modal -->
 <x-product-modal />
 
-<!-- Include cart/wishlist logic -->
-@include('public-site.partials.cw-logic')
+
 
 @endsection
 
 @push('scripts')
+<!-- Include cart/wishlist logic -->
+@include('public-site.partials.cw-logic')
 @include('public-site.partials.cw-logic2')
 @endpush
