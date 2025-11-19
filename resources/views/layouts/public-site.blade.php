@@ -8,6 +8,8 @@
 
     <link rel="shortcut icon" href="{{ asset('assets/images/logo.png') }}" type="image/x-icon">
 
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 

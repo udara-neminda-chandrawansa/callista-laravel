@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Artisan;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\WishlistController;
 
 /*
 |--------------------------------------------------------------------------
@@ -92,6 +94,20 @@ Route::get('/cart', function () {
 Route::get('/api/products', [ProductController::class, 'getProducts'])->name('api.products');
 Route::get('/api/products/{id}', [ProductController::class, 'getProduct'])->name('api.product');
 Route::get('/api/categories', [ProductController::class, 'getCategories'])->name('api.categories');
+
+// Cart routes
+Route::post('/cart/add', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/update', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+Route::get('/cart/count', [CartController::class, 'getCount'])->name('cart.count');
+Route::get('/cart/total', [CartController::class, 'getTotal'])->name('cart.total');
+
+// Wishlist routes
+Route::post('/wishlist/add', [WishlistController::class, 'add'])->name('wishlist.add');
+Route::post('/wishlist/remove', [WishlistController::class, 'remove'])->name('wishlist.remove');
+Route::get('/wishlist/count', [WishlistController::class, 'getCount'])->name('wishlist.count');
+Route::get('/wishlist/total', [WishlistController::class, 'getTotal'])->name('wishlist.total');
 
 // Admin Login Route
 Route::get('admin/login', [AdminController::class, 'login'])->name('admin.login');
