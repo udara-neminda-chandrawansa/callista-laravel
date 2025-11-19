@@ -479,7 +479,7 @@ function populateModal(product) {
             ratingHtml += '<i class="far fa-star"></i>';
         }
     }
-    ratingHtml += `<span>(${product.rating.toFixed(1)})</span>`;
+    ratingHtml += `<span>(${product.rating})</span>`;
     ratingContainer.innerHTML = ratingHtml;
     
     // Set price

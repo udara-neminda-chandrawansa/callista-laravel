@@ -336,7 +336,7 @@ class MarketplaceFilter {
                 html += '<i class="far fa-star"></i>';
             }
         }
-        html += `<span>(${rating.toFixed(1)})</span></div>`;
+        html += `<span>(${rating})</span></div>`;
         return html;
     }
     
