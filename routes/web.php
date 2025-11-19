@@ -8,6 +8,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WishlistController;
+use App\Http\Controllers\CustomRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -70,9 +71,8 @@ Route::get('/marketplace', function () {
 })->name('marketplace');
 
 
-Route::get('/customize', function () {
-    return view('public-site.customize');
-})->name('customize');
+Route::get('/customize', [CustomRequestController::class, 'index'])->name('customize');
+Route::post('/customize', [CustomRequestController::class, 'store'])->name('customize.store');
 
 
 Route::get('/interior-design', function () {
@@ -162,4 +162,10 @@ Route::middleware([
     Route::get('/admin/products/{product}/edit', [AdminController::class, 'editProduct'])->name('admin.products.edit');
     Route::put('/admin/products/{product}', [AdminController::class, 'updateProduct'])->name('admin.products.update');
     Route::delete('/admin/products/{product}', [AdminController::class, 'destroyProduct'])->name('admin.products.destroy');
+    
+    // Custom Request routes
+    Route::get('/admin/custom-requests', [CustomRequestController::class, 'adminIndex'])->name('admin.custom-requests');
+    Route::get('/admin/custom-requests/{id}', [CustomRequestController::class, 'show'])->name('admin.custom-requests.show');
+    Route::put('/admin/custom-requests/{id}', [CustomRequestController::class, 'update'])->name('admin.custom-requests.update');
+    Route::delete('/admin/custom-requests/{id}', [CustomRequestController::class, 'destroy'])->name('admin.custom-requests.destroy');
 });
