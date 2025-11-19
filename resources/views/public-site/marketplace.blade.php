@@ -6,6 +6,7 @@
 <link rel="stylesheet" href="{{ asset('assets/css/marketplace.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/sidebar-filters.css') }}">
 <link rel="stylesheet" href="{{ asset('assets/css/slideshow-fix.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/css/product-components.css') }}">
 @endpush
 
 <!-- Hero Section -->
@@ -77,11 +78,9 @@
             <h2 class="section-title">Furniture <span class="gradient-text">Marketplace</span></h2>
             <div class="section-nav">
                 <button class="tab-btn active" data-filter="all">All</button>
-                <button class="tab-btn" data-filter="tables">Tables</button>
-                <button class="tab-btn" data-filter="chairs">Chairs</button>
-                <button class="tab-btn" data-filter="living-room">Living Room</button>
-                <button class="tab-btn" data-filter="bedroom-sets">Bedroom</button>
-                <button class="tab-btn" data-filter="custom">Custom</button>
+                @foreach($categories->take(5) as $category)
+                    <button class="tab-btn" data-filter="{{ $category }}">{{ ucfirst(str_replace('-', ' ', $category)) }}</button>
+                @endforeach
             </div>
         </div>
 
@@ -123,26 +122,12 @@
                             <input type="radio" name="category" value="all" checked>
                             <span class="option-text">All Categories</span>
                         </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="living-room">
-                            <span class="option-text">Living Room</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="bedroom-sets">
-                            <span class="option-text">Bedroom</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="tables">
-                            <span class="option-text">Tables</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="chairs">
-                            <span class="option-text">Chairs</span>
-                        </label>
-                        <label class="filter-option">
-                            <input type="radio" name="category" value="custom">
-                            <span class="option-text">Custom</span>
-                        </label>
+                        @foreach($categories as $category)
+                            <label class="filter-option">
+                                <input type="radio" name="category" value="{{ $category }}">
+                                <span class="option-text">{{ ucfirst(str_replace('-', ' ', $category)) }}</span>
+                            </label>
+                        @endforeach
                     </div>
                 </div>
 
@@ -219,273 +204,34 @@
                     </div>
                 </div>
                 <!-- Products Grid -->
-                <div class="products-grid" id="featured-products">
-                    <!-- Product Card 1 -->
-                    <div class="product-card tables" data-aos="fade-up">
-                        <div class="product-badge">Popular</div>
-                        <div class="product-image">
-                            <img src="../assets/sofa.png" alt="Modern Dining Table">
-                            <div class="product-overlay">
-                                <button class="product-action" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="product-action" title="Quick View">
-                                    <i class="far fa-eye"></i>
-                                </button>
-                                <button class="product-action" title="Add to Cart">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </div>
+                                <!-- Products Grid -->
+                <div class="products-grid" id="marketplace-products-grid">
+                    @forelse($products as $index => $product)
+                        <x-product-card 
+                            :product="$product" 
+                            :badge-text="$product->old_price && $product->old_price > $product->new_price ? 'Sale' : ($product->rating >= 4.5 ? 'Popular' : ($product->created_at->diffInDays() <= 30 ? 'New' : 'Featured'))"
+                            :classes="$product->type"
+                            data-aos="fade-up" 
+                            data-aos-delay="{{ ($index % 4) * 100 }}"
+                        />
+                    @empty
+                        <div class="no-products" style="grid-column: 1 / -1; text-align: center; padding: 80px 40px;">
+                            <i class="fas fa-search-minus" style="font-size: 4rem; color: #d1d5db; margin-bottom: 24px;"></i>
+                            <h3 style="color: #6b7280; margin-bottom: 12px; font-size: 1.5rem;">No Products Found</h3>
+                            <p style="color: #9ca3af; margin-bottom: 24px;">Try adjusting your filters or search terms</p>
+                            <button class="btn btn-primary" onclick="resetAllFilters()">
+                                <i class="fas fa-redo"></i> Reset All Filters
+                            </button>
                         </div>
-                        <div class="product-info">
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>(4.2)</span>
-                            </div>
-                            <h3 class="product-title">Modern Dining Table</h3>
-                            <div class="product-price">
-                                <span class="price-current">Rs. 125,000</span>
-                                <span class="price-original">Rs. 140,000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 2 -->
-                    <div class="product-card chairs" data-aos="fade-up" data-aos-delay="100">
-                        <div class="product-badge">Bestseller</div>
-                        <div class="product-image">
-                            <img src="../assets/bed.png" alt="Ergonomic Office Chair">
-                            <div class="product-overlay">
-                                <button class="product-action" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="product-action" title="Quick View">
-                                    <i class="far fa-eye"></i>
-                                </button>
-                                <button class="product-action" title="Add to Cart">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <span>(4.8)</span>
-                            </div>
-                            <h3 class="product-title">Ergonomic Office Chair</h3>
-                            <div class="product-price">
-                                <span class="price-current">Rs. 45,000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 3 -->
-                    <div class="product-card living-room" data-aos="fade-up" data-aos-delay="200">
-                        <div class="product-badge">Featured</div>
-                        <div class="product-image">
-                            <img src="../assets/funi (1).jpeg" alt="Luxury Sofa Set">
-                            <div class="product-overlay">
-                                <button class="product-action" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="product-action" title="Quick View">
-                                    <i class="far fa-eye"></i>
-                                </button>
-                                <button class="product-action" title="Add to Cart">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>(4.5)</span>
-                            </div>
-                            <h3 class="product-title">Luxury Sofa Set</h3>
-                            <div class="product-price">
-                                <span class="price-current">Rs. 185,000</span>
-                                <span class="price-original">Rs. 210,000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 4 -->
-                    <div class="product-card bedroom-sets" data-aos="fade-up" data-aos-delay="300">
-                        <div class="product-badge">Customizable</div>
-                        <div class="product-image">
-                            <img src="../assets/funi (2).jpeg" alt="Complete Bedroom Set">
-                            <div class="product-overlay">
-                                <button class="product-action" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="product-action" title="Quick View">
-                                    <i class="far fa-eye"></i>
-                                </button>
-                                <button class="product-action" title="Add to Cart">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>(4.3)</span>
-                            </div>
-                            <h3 class="product-title">Complete Bedroom Set</h3>
-                            <div class="product-price">
-                                <span class="price-current">Rs. 275,000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 5 -->
-                    <div class="product-card tables" data-aos="fade-up" data-aos-delay="400">
-                        <div class="product-badge">New</div>
-                        <div class="product-image">
-                            <img src="../assets/sofa.png" alt="Coffee Table">
-                            <div class="product-overlay">
-                                <button class="product-action" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="product-action" title="Quick View">
-                                    <i class="far fa-eye"></i>
-                                </button>
-                                <button class="product-action" title="Add to Cart">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <span>(5.0)</span>
-                            </div>
-                            <h3 class="product-title">Designer Coffee Table</h3>
-                            <div class="product-price">
-                                <span class="price-current">Rs. 65,000</span>
-                                <span class="price-original">Rs. 75,000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 6 -->
-                    <div class="product-card chairs" data-aos="fade-up" data-aos-delay="500">
-                        <div class="product-badge">Trending</div>
-                        <div class="product-image">
-                            <img src="../assets/bed.png" alt="Dining Chairs Set">
-                            <div class="product-overlay">
-                                <button class="product-action" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="product-action" title="Quick View">
-                                    <i class="far fa-eye"></i>
-                                </button>
-                                <button class="product-action" title="Add to Cart">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>(4.1)</span>
-                            </div>
-                            <h3 class="product-title">Dining Chairs Set (4)</h3>
-                            <div class="product-price">
-                                <span class="price-current">Rs. 95,000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 7 -->
-                    <div class="product-card custom" data-aos="fade-up" data-aos-delay="600">
-                        <div class="product-badge">Custom</div>
-                        <div class="product-image">
-                            <img src="../assets/funi (1).jpeg" alt="Custom Wardrobe">
-                            <div class="product-overlay">
-                                <button class="product-action" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="product-action" title="Quick View">
-                                    <i class="far fa-eye"></i>
-                                </button>
-
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <span>(4.9)</span>
-                            </div>
-                            <h3 class="product-title">Custom Built Wardrobe</h3>
-                            <div class="product-price">
-                                <span class="price-current">Rs. 195,000</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Product Card 8 -->
-                    <div class="product-card living-room" data-aos="fade-up" data-aos-delay="700">
-                        <div class="product-badge">Sale</div>
-                        <div class="product-image">
-                            <img src="../assets/funi (2).jpeg" alt="Entertainment Unit">
-                            <div class="product-overlay">
-                                <button class="product-action" title="Add to Wishlist">
-                                    <i class="far fa-heart"></i>
-                                </button>
-                                <button class="product-action" title="Quick View">
-                                    <i class="far fa-eye"></i>
-                                </button>
-                                <button class="product-action" title="Add to Cart">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-rating">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="far fa-star"></i>
-                                <span>(4.4)</span>
-                            </div>
-                            <h3 class="product-title">Modern Entertainment Unit</h3>
-                            <div class="product-price">
-                                <span class="price-current">Rs. 155,000</span>
-                                <span class="price-original">Rs. 185,000</span>
-                            </div>
-                        </div>
-                    </div>
+                    @endforelse
                 </div>
+                
+                <!-- Pagination -->
+                @if($products->hasPages())
+                    <div class="pagination-wrapper" style="margin-top: 40px;">
+                        {{ $products->links() }}
+                    </div>
+                @endif
 
                 <!-- No Results Message -->
                 <div class="no-results" id="no-results">
@@ -594,10 +340,14 @@
         </div>
 </section>
 
+<!-- Product Modal -->
+<x-product-modal />
+
 @push('scripts')
 <script src="{{ asset('assets/js/marketplace.js') }}"></script>
 <script src="{{ asset('assets/js/sidebar-filters.js') }}"></script>
 <script src="{{ asset('assets/js/slideshow-fix.js') }}"></script>
+<script src="{{ asset('assets/js/marketplace-filter.js') }}"></script>
 @endpush
 
 @endsection
