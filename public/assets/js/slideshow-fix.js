@@ -1,12 +1,12 @@
 // DIRECT SLIDESHOW FIX - FORCE OVERRIDE
 // This will definitely work
 
-console.log('🔧 Direct slideshow fix starting...');
+// console.log('🔧 Direct slideshow fix starting...');
 
 let slideshowFixed = false;
 
 function forceFixSlideshow() {
-    console.log('🎯 Attempting slideshow fix...');
+    // console.log('🎯 Attempting slideshow fix...');
     
     const slidesTrack = document.getElementById('slidesTrack');
     const slides = document.querySelectorAll('.slide');
@@ -32,7 +32,7 @@ function forceFixSlideshow() {
     
     // Force show slide function
     function forceShowSlide(index) {
-        console.log(`🎯 Force showing slide ${index}`);
+        //console.log(`🎯 Force showing slide ${index}`);
         
         // Remove all active classes
         slides.forEach((slide, i) => {
@@ -58,7 +58,7 @@ function forceFixSlideshow() {
             dots[index].classList.add('active');
         }
         
-        console.log(`✅ Slide ${index} is now visible`);
+        //console.log(`✅ Slide ${index} is now visible`);
     }
     
     // Initialize first slide
@@ -68,14 +68,14 @@ function forceFixSlideshow() {
     function goNext() {
         currentIndex = (currentIndex + 1) % slides.length;
         forceShowSlide(currentIndex);
-        console.log(`➡️ Next slide: ${currentIndex}`);
+        //console.log(`➡️ Next slide: ${currentIndex}`);
     }
     
     // Previous slide
     function goPrev() {
         currentIndex = currentIndex === 0 ? slides.length - 1 : currentIndex - 1;
         forceShowSlide(currentIndex);
-        console.log(`⬅️ Previous slide: ${currentIndex}`);
+        //console.log(`⬅️ Previous slide: ${currentIndex}`);
     }
     
     // Auto slideshow
