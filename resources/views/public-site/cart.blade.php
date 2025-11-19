@@ -294,8 +294,8 @@
     };
 
     // Update cart counts and totals on page load
-    updateCartCount();
-    loadCartTotal();
+    //updateCartCount();
+    //loadCartTotal();
 
     // Handle quantity changes with delegation
     $(document).on('click', '.qty-btn.plus', function(e) {
@@ -347,6 +347,7 @@
 
     // Handle checkout button
     $('.checkout-btn').on('click', function() {
+        console.log("test");
         @auth
             // If user is logged in, proceed to checkout
             Swal.fire({
@@ -358,8 +359,8 @@
                 cancelButtonText: 'Continue Shopping'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    // Redirect to checkout page (you'll need to create this)
-                    window.location.href = '/checkout';
+                    // Redirect to checkout page
+                    window.location.href = "{{ route('checkout.show') }}";
                 }
             });
         @else

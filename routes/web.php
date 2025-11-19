@@ -111,7 +111,7 @@ Route::get('/wishlist/count', [WishlistController::class, 'getCount'])->name('wi
 Route::get('/wishlist/total', [WishlistController::class, 'getTotal'])->name('wishlist.total');
 
 Route::prefix('checkout')->group(function () {
-    //Route::get('/', [PaymentController::class, 'show'])->name('checkout.show');
+    Route::get('/', [PaymentController::class, 'show'])->name('checkout.show');
     Route::post('/store', [PaymentController::class, 'store'])->name('checkout.store');
 
     Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.success');

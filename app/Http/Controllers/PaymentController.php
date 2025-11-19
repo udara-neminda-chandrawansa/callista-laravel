@@ -4,68 +4,213 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use App\Models\Product;
 use App\Models\UserCart;
-use App\Models\Order;
-use App\Models\OrderItem;
+use App\Models\UserBillingData;
+use App\Models\UserOrder;
+use Darryldecode\Cart\Facades\CartFacade as Cart;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class PaymentController extends Controller
 {
+    /**
+     * Display the checkout page
+     */
+    public function show()
+    {
+        if (Auth::check()) {
+            // For logged-in users, get cart from database
+            $userId = Auth::id();
+            $cartItems = UserCart::where('user_id', $userId)->get();
+            
+            if ($cartItems->isEmpty()) {
+                return redirect()->route('cart')->with('error', 'Your cart is empty.');
+            }
+            
+            $cartCount = $cartItems->sum('quantity');
+            $billingData = UserBillingData::where('user_id', $userId)->first();
+        } else {
+            // For guest users, get cart from session
+            $cartItems = Cart::getContent();
+            
+            if ($cartItems->isEmpty()) {
+                return redirect()->route('cart')->with('error', 'Your cart is empty.');
+            }
+            
+            $cartCount = Cart::getTotalQuantity();
+            $billingData = null;
+        }
+        
+        // Fetch full product details for each cart item
+        $cartItemsWithDetails = collect();
+        $totalDiscount = 0;
+        
+        foreach ($cartItems as $item) {
+            if (Auth::check()) {
+                $productId = $item->item_id;
+                $itemName = $item->name;
+                $itemPrice = $item->price;
+                $itemQuantity = $item->quantity;
+            } else {
+                $productId = $item->id;
+                $itemName = $item->name;
+                $itemPrice = $item->price;
+                $itemQuantity = $item->quantity;
+            }
+
+            $product = Product::with('images')->find($productId);
+            if ($product) {
+                // Calculate discount for this item
+                $itemDiscount = 0;
+                if ($product->old_price && $product->old_price > $product->new_price) {
+                    $itemDiscount = $itemQuantity * ($product->old_price - $product->new_price);
+                    $totalDiscount += $itemDiscount;
+                }
+                
+                // Add product details to cart item
+                $itemWithDetails = (object) [
+                    'id' => $productId,
+                    'name' => $itemName,
+                    'price' => $itemPrice,
+                    'quantity' => $itemQuantity,
+                    'product' => $product,
+                    'item_discount' => $itemDiscount
+                ];
+                
+                $cartItemsWithDetails->push($itemWithDetails);
+            }
+        }
+        
+        $subtotal = $cartItemsWithDetails->sum(function ($item) {
+            return $item->quantity * $item->price;
+        });
+
+        $deliveryFee = $subtotal > 50000 ? 0 : 1500; // Free delivery over Rs. 50,000
+        $finalTotal = $subtotal - $totalDiscount + $deliveryFee;
+
+        return view('public-site.checkout', compact(
+            'cartItemsWithDetails', 
+            'cartCount', 
+            'subtotal', 
+            'totalDiscount', 
+            'deliveryFee', 
+            'finalTotal',
+            'billingData'
+        ));
+    }
+
     // Server-to-server notification from PayHere
     public function store(Request $request)
     {
-        $user = Auth::guard('public_user')->user();
+        Log::info('Checkout Request Received', $request->all()); // Debug log
 
         $request->validate([
             'first_name' => 'required|string|max:255',
             'last_name' => 'required|string|max:255',
-            'company' => 'required|string|max:255',
-            'address_line1' => 'required|string|max:255',
-            'address_line2' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'province' => 'required|string|max:255',
+            'company_name' => 'nullable|string|max:255',
+            'address_1' => 'required|string|max:255',
+            'address_2' => 'nullable|string|max:255',
+            'town' => 'required|string|max:255',
             'postal_code' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
             'email' => 'required|email|max:255',
             'notes' => 'nullable|string|max:1000',
-            'payment_method' => 'required|in:bank_transfer,card_payment',
+            'payment_method' => 'required|in:bank_transfer,card_payment,cash_on_delivery',
             'payment_slip' => 'required_if:payment_method,bank_transfer|nullable|image|mimes:jpeg,png,jpg,gif|max:5120',
         ]);
 
-        $cart = UserCart::with('items.product')->where('public_user_id', $user->id)->first();
-
-        if (!$cart || $cart->items->isEmpty()) {
-            return redirect()->route('cart')->with('error', 'Your cart is empty.');
+        // Get cart items based on user authentication
+        if (Auth::check()) {
+            $userId = Auth::id();
+            $cartItems = UserCart::where('user_id', $userId)->get();
+            
+            if ($cartItems->isEmpty()) {
+                Log::warning('Checkout attempt with empty cart for user ID: ' . $userId);
+                return redirect()->route('cart')->with('error', 'Your cart is empty.');
+            }
+            Log::info('User ID for checkout: ' . $userId); // Debug log
+        } else {
+            return redirect()->route('login')->with('error', 'Please login to complete your order.');
         }
 
-        $total = $cart->items->sum(function ($item) {
-            $discount = $item->product->product_discount;
-            $price = $item->product->selling_price;
-            return ($price - ($price * $discount / 100)) * $item->quantity;
-        });
+        // Calculate total from cart items
+        $total = 0;
+        $orderItems = [];
+        
+        foreach ($cartItems as $item) {
+            $product = Product::find($item->item_id);
+            if (!$product) {
+                return redirect()->route('cart')->with('error', 'Some products in your cart are no longer available.');
+            }
+            
+            // Check stock availability
+            if ($product->stock_status === 'out_of_stock') {
+                return redirect()->route('cart')->with('error', "Product '{$product->name}' is out of stock.");
+            }
+            
+            $itemTotal = $product->new_price * $item->quantity;
+            $total += $itemTotal;
+            
+            $orderItems[] = [
+                'product' => $product,
+                'quantity' => $item->quantity,
+                'price' => $product->new_price,
+                'total' => $itemTotal
+            ];
+        }
+
+        Log::info('Checkout Total: ', $total); // Debug log
 
         DB::beginTransaction();
 
         try {
             // Generate order code
-            $latestOrder = Order::latest()->first();
+            $latestOrder = UserOrder::latest()->first();
             $nextNumber = $latestOrder ? intval(substr($latestOrder->order_code, 3)) + 1 : 1;
-            $orderCode = 'YIO' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+            $orderCode = 'CAL' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
+
+            Log::info('Order Code: ', $orderCode); // Debug log
 
             // Handle payment slip upload
             $paymentSlipPath = null;
             if ($request->hasFile('payment_slip')) {
                 $slip = $request->file('payment_slip');
                 $slipName = $orderCode . '_' . time() . '.' . $slip->getClientOriginalExtension();
-                $slip->move(public_path('uploads/payment_slips'), $slipName);
+                
+                // Create directory if it doesn't exist
+                $uploadPath = public_path('uploads/payment_slips');
+                if (!file_exists($uploadPath)) {
+                    mkdir($uploadPath, 0755, true);
+                }
+                
+                $slip->move($uploadPath, $slipName);
                 $paymentSlipPath = 'uploads/payment_slips/' . $slipName;
             }
 
-            // Create the order (for both card and cash)
-            $order = Order::create([
+            // Save or update billing data for logged-in users
+            if (Auth::check()) {
+                UserBillingData::updateOrCreate(
+                    ['user_id' => $userId],
+                    [
+                        'first_name' => $request->first_name,
+                        'last_name' => $request->last_name,
+                        'company_name' => $request->company_name,
+                        'address_1' => $request->address_1,
+                        'address_2' => $request->address_2,
+                        'town' => $request->town,
+                        'postal_code' => $request->postal_code,
+                        'phone' => $request->phone,
+                        'email' => $request->email,
+                        'notes' => $request->notes,
+                    ]
+                );
+            }
+
+            // Create the order
+            $order = UserOrder::create([
                 'order_code' => $orderCode,
-                'public_user_id' => $user->id,
+                'user_id' => $userId,
                 'first_name' => $request->first_name,
                 'last_name' => $request->last_name,
                 'company' => $request->company,
@@ -78,35 +223,24 @@ class PaymentController extends Controller
                 'email' => $request->email,
                 'notes' => $request->notes,
                 'payment_method' => $request->payment_method,
-                'payment_slip' => $paymentSlipPath, // Store the path
-                'total' => $total,
+                'payment_slip' => $paymentSlipPath,
+                'total_amount' => $total,
+                'order_status' => 'pending',
+                'payment_status' => $request->payment_method === 'card_payment' ? 'pending' : 'completed',
             ]);
 
-            foreach ($cart->items as $item) {
-                $discountedPrice = $item->product->selling_price;
-                if ($item->product->product_discount > 0) {
-                    $discountedPrice -= $discountedPrice * $item->product->product_discount / 100;
-                }
-
-                OrderItem::create([
-                    'order_id' => $order->id,
-                    'product_id' => $item->product_id,
-                    'quantity' => $item->quantity,
-                    'unit_price' => $discountedPrice,
-                    'price' => $discountedPrice * $item->quantity,
-                ]);
-
-                $product = $item->product;
-                if ($product->stock_quantity >= $item->quantity) {
-                    $product->stock_quantity -= $item->quantity;
-                    $product->save();
-                } else {
-                    throw new \Exception("Insufficient stock for product: {$product->name}");
-                }
+            // Create order items and update stock
+            foreach ($orderItems as $orderItem) {
+                // Here you would create order items in a separate table if you have one
+                // For now, we'll just clear the cart since the order contains the total
+                
+                $product = $orderItem['product'];
+                // Update stock if you have stock tracking
+                // $product->update(['stock_quantity' => $product->stock_quantity - $orderItem['quantity']]);
             }
 
-            $cart->items()->delete();
-            $cart->delete();
+            // Clear the user's cart
+            UserCart::where('user_id', $userId)->delete();
 
             DB::commit();
 
@@ -154,6 +288,8 @@ class PaymentController extends Controller
             return redirect()->route('home')->with('success', 'Order placed successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
+
+            Log::error('Checkout error: ' . $e->getMessage());
 
             // Delete uploaded payment slip if order creation fails
             if ($paymentSlipPath && file_exists(public_path($paymentSlipPath))) {
@@ -220,12 +356,12 @@ class PaymentController extends Controller
 
         // Step 5: Handle completed payment (status 2 = success)
         if ((int) $status === 2) {
-            $order = Order::where('order_code', $order_id)->first();
+            $order = UserOrder::where('order_code', $order_id)->first();
 
             if ($order) {
                 if ($order->payment_status !== 'completed') {
                     $order->payment_status = 'completed';
-                    // $order->order_status = 'processing'; // Optional: update order status
+                    $order->order_status = 'processing'; // Update order status
                     $order->save();
 
                     Log::info("Order #{$order->order_code} payment marked as completed.");
