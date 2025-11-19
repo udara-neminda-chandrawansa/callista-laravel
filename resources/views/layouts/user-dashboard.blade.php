@@ -88,7 +88,7 @@
 
         .nav-menu {
             list-style: none;
-
+            padding-left: 0px;
             display: flex;
             flex-direction: column;
         }
