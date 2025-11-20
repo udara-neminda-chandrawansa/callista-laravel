@@ -136,6 +136,11 @@ class CustomRequestController extends Controller
             $query->where('status', $request->status);
         }
         
+        // Filter by request ID
+        if ($request->filled('request_id')) {
+            $query->where('id', $request->request_id);
+        }
+
         // Search by name or email
         if ($request->filled('search')) {
             $query->where(function($q) use ($request) {
@@ -143,6 +148,30 @@ class CustomRequestController extends Controller
                   ->orWhere('email', 'like', '%' . $request->search . '%')
                   ->orWhere('furniture_type', 'like', '%' . $request->search . '%');
             });
+        }
+
+        // Filter by date range
+        if ($request->filled('date_range')) {
+            $dateRange = $request->date_range;
+            switch ($dateRange) {
+                case 'today':
+                    $query->whereDate('created_at', today());
+                    break;
+                case 'week':
+                    $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]);
+                    break;
+                case 'month':
+                    $query->whereBetween('created_at', [now()->startOfMonth(), now()->endOfMonth()]);
+                    break;
+                case 'custom':
+                    if ($request->filled('date_from')) {
+                        $query->whereDate('created_at', '>=', $request->date_from);
+                    }
+                    if ($request->filled('date_to')) {
+                        $query->whereDate('created_at', '<=', $request->date_to);
+                    }
+                    break;
+            }
         }
 
         $customRequests = $query->orderBy('created_at', 'desc')->paginate(10);
@@ -166,7 +195,34 @@ class CustomRequestController extends Controller
         }
 
         $customRequest = CustomRequest::findOrFail($id);
-        return view('admin-dashboard.custom-request-details', compact('customRequest'));
+        
+        // Return HTML for modal view
+        return view('admin-dashboard.partials.custom-request-details', compact('customRequest'));
+    }
+
+    /**
+     * Get custom request data for editing
+     */
+    public function edit($id)
+    {
+        // Ensure only admins can access
+        if (auth()->user()->role !== 'admin') {
+            return response()->json(['error' => 'Access denied'], 403);
+        }
+
+        try {
+            $customRequest = CustomRequest::findOrFail($id);
+            
+            return response()->json([
+                'success' => true,
+                'request' => $customRequest
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Custom request not found.'
+            ], 404);
+        }
     }
 
     /**

@@ -460,6 +460,27 @@
         color: #7c3aed;
     }
 
+    /* Additional status styles for custom requests */
+    .status-reviewing {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    .status-quoted {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+
+    .status-approved {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .status-in-progress {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
     /* Modal Styles */
     .modal {
         display: none;
@@ -835,25 +856,165 @@
     .budget-range {
         min-width: 120px;
     }
+
+    /* Action buttons styling */
+    .btn-action {
+        padding: 6px 8px;
+        margin: 0 2px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .btn-view {
+        background: #3b82f6;
+        color: white;
+    }
+
+    .btn-view:hover {
+        background: #2563eb;
+        transform: translateY(-1px);
+    }
+
+    .btn-edit-order {
+        background: #059669;
+        color: white;
+    }
+
+    .btn-edit-order:hover {
+        background: #047857;
+        transform: translateY(-1px);
+    }
+
+    .btn-delete-order {
+        background: #dc2626;
+        color: white;
+    }
+
+    .btn-delete-order:hover {
+        background: #b91c1c;
+        transform: translateY(-1px);
+    }
+
+    .order-actions {
+        display: flex;
+        gap: 4px;
+        justify-content: center;
+    }
 </style>
 
 <script>
-// Basic JavaScript functions for custom requests
+// Custom request management functions
 function viewRequestDetails(id) {
-    // Placeholder function - can be implemented later
-    alert('View request details for ID: ' + id);
+    fetch(`/admin/custom-requests/${id}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('requestDetailsContent').innerHTML = html;
+            document.getElementById('requestDetailsModal').style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to load request details.',
+                icon: 'error',
+                confirmButtonColor: '#dc2626'
+            });
+        });
 }
 
-function editRequestStatus(id, status) {
-    // Placeholder function - can be implemented later
-    alert('Edit request status for ID: ' + id + ', current status: ' + status);
+function editRequestStatus(id, currentStatus) {
+    // Populate the edit modal with current data
+    fetch(`/admin/custom-requests/${id}/edit`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const request = data.request;
+                document.getElementById('editRequestId').value = id;
+                document.getElementById('editRequestStatus').value = request.status;
+                document.getElementById('editQuotedPrice').value = request.quoted_price || '';
+                document.getElementById('editAdminNotes').value = request.admin_notes || '';
+                document.getElementById('editRequestModal').style.display = 'block';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to load request data.',
+                icon: 'error',
+                confirmButtonColor: '#dc2626'
+            });
+        });
 }
 
 function deleteRequest(id) {
-    // Placeholder function - can be implemented later
-    if (confirm('Are you sure you want to delete this custom request?')) {
-        alert('Delete request ID: ' + id);
-    }
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "This custom request will be permanently deleted!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#6b7280',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Show loading
+            Swal.fire({
+                title: 'Deleting...',
+                text: 'Please wait while we delete the request.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch(`/admin/custom-requests/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Deleted!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#059669'
+                    }).then(() => {
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to delete the request.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An unexpected error occurred.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc2626'
+                });
+            });
+        }
+    });
 }
 
 function applyFilters() {
@@ -891,6 +1052,73 @@ document.addEventListener('DOMContentLoaded', function() {
     if (dateRangeSelect && customDateInputs) {
         dateRangeSelect.addEventListener('change', function() {
             customDateInputs.style.display = this.value === 'custom' ? 'block' : 'none';
+        });
+    }
+
+    // Handle edit form submission
+    const editForm = document.getElementById('editRequestForm');
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const requestId = document.getElementById('editRequestId').value;
+            const formData = {
+                status: document.getElementById('editRequestStatus').value,
+                quoted_price: document.getElementById('editQuotedPrice').value,
+                admin_notes: document.getElementById('editAdminNotes').value,
+                _token: document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            };
+
+            // Show loading
+            Swal.fire({
+                title: 'Updating...',
+                text: 'Please wait while we update the request.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            fetch(`/admin/custom-requests/${requestId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire({
+                        title: 'Updated!',
+                        text: data.message,
+                        icon: 'success',
+                        confirmButtonColor: '#059669'
+                    }).then(() => {
+                        closeModal('editRequestModal');
+                        location.reload();
+                    });
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: data.message || 'Failed to update the request.',
+                        icon: 'error',
+                        confirmButtonColor: '#dc2626'
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'An unexpected error occurred.',
+                    icon: 'error',
+                    confirmButtonColor: '#dc2626'
+                });
+            });
         });
     }
 });
