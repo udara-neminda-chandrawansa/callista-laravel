@@ -9,6 +9,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CustomRequestController;
+use App\Http\Controllers\ConsultationRequestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -170,3 +171,6 @@ Route::middleware([
     Route::put('/admin/custom-requests/{id}', [CustomRequestController::class, 'update'])->name('admin.custom-requests.update');
     Route::delete('/admin/custom-requests/{id}', [CustomRequestController::class, 'destroy'])->name('admin.custom-requests.destroy');
 });
+
+// Consultation Request route
+Route::post('/consultation-request', [ConsultationRequestController::class, 'store'])->name('consultation-request.store');
